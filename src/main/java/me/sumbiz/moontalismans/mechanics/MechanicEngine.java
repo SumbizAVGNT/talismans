@@ -442,7 +442,14 @@ public class MechanicEngine {
         if (Math.random() < chance) {
             Collection<PotionEffect> effects = target.getActivePotionEffects();
             for (PotionEffect effect : effects) {
-                if (effect.getType().getCategory() == PotionEffectType.Category.BENEFICIAL) {
+                // Steal beneficial effects (positive potion effects)
+                PotionEffectType type = effect.getType();
+                if (type.equals(PotionEffectType.SPEED) || type.equals(PotionEffectType.STRENGTH) ||
+                    type.equals(PotionEffectType.JUMP_BOOST) || type.equals(PotionEffectType.REGENERATION) ||
+                    type.equals(PotionEffectType.RESISTANCE) || type.equals(PotionEffectType.FIRE_RESISTANCE) ||
+                    type.equals(PotionEffectType.WATER_BREATHING) || type.equals(PotionEffectType.INVISIBILITY) ||
+                    type.equals(PotionEffectType.NIGHT_VISION) || type.equals(PotionEffectType.HEALTH_BOOST) ||
+                    type.equals(PotionEffectType.ABSORPTION) || type.equals(PotionEffectType.SATURATION)) {
                     attacker.addPotionEffect(effect);
                     target.removePotionEffect(effect.getType());
                 }
@@ -841,7 +848,7 @@ public class MechanicEngine {
             double chance = mechanic.getDouble("chance", 0.30);
             if (Math.random() < chance) {
                 event.setCancelled(true);
-                player.getWorld().spawnParticle(Particle.BARRIER, player.getLocation().add(0, 1, 0), 5);
+                player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
             }
         }
     }
