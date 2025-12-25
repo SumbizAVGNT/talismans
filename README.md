@@ -236,20 +236,87 @@ effects:
   particles_enabled: true          # Включить частицы
   effect_refresh_interval: 40      # Интервал обновления (тики)
   particle_interval: 10            # Интервал частиц (тики)
-  phoenix_cooldown: 300000         # Кулдаун Феникса (мс)
 
-  chances:
-    cobra_poison: 0.30             # Шанс яда Кобры
-    krait_slow: 0.25               # Шанс замедления Крайта
-    crusher_stun: 0.20             # Шанс оглушения Крушителя
-    chimera_random: 0.35           # Шанс эффектов Химеры
-    pandora_aoe: 0.25              # Шанс AOE Пандоры
+  mechanics:
+    phoenix:
+      enabled: true
+      low_health_threshold: 0.3
+      low_health_regeneration:
+        duration: 60
+        amplifier: 1
+      revive:
+        health_multiplier: 0.3
+        regeneration:
+          duration: 100
+          amplifier: 2
+        fire_resistance:
+          duration: 100
+          amplifier: 0
+      cooldown: 300000
 
-  multipliers:
-    echidna_lifesteal: 0.15        # Вампиризм Ехидны
-    punisher_crit_bonus: 1.20      # Бонус крита Карателя
-    aegis_damage_reduction: 0.90   # Сокращение урона Эгиды
-    osiris_reflect: 0.15           # Отражение Осириса
+    cobra:
+      enabled: true
+      chance: 0.30
+      poison:
+        duration: 60
+        amplifier: 0
+
+    echidna:
+      enabled: true
+      lifesteal: 0.15
+
+    punisher:
+      enabled: true
+      crit_bonus: 1.20
+
+    krait:
+      enabled: true
+      chance: 0.25
+      slowness:
+        duration: 40
+        amplifier: 1
+
+    crusher:
+      enabled: true
+      chance: 0.20
+      mining_fatigue:
+        duration: 60
+        amplifier: 2
+      nausea:
+        duration: 60
+        amplifier: 0
+
+    chimera:
+      enabled: true
+      chance: 0.35
+      effect:
+        duration: 60
+        amplifier: 0
+
+    pandora:
+      enabled: true
+      chance: 0.25
+      radius: 3.0
+      weakness:
+        duration: 60
+        amplifier: 0
+
+    aegis:
+      enabled: true
+      damage_reduction: 0.90
+      resistance:
+        duration: 60
+        amplifier: 0
+
+    titan:
+      enabled: true
+      resistance:
+        duration: 40
+        amplifier: 0
+
+    osiris:
+      enabled: true
+      reflect: 0.15
 ```
 
 ---
