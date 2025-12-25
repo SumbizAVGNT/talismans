@@ -33,6 +33,7 @@ public class TalismanItem {
     private final String displayName;
     private final List<String> lore;
     private final Material material;
+    private final Integer customModelData;
     private final boolean glint;
     private final List<ItemFlag> itemFlags;
     private final String headTexture;
@@ -47,7 +48,7 @@ public class TalismanItem {
     private static NamespacedKey KEY_TYPE;
 
     public TalismanItem(String id, boolean enabled, String displayName, List<String> lore,
-                       Material material, boolean glint, List<ItemFlag> itemFlags,
+                       Material material, Integer customModelData, boolean glint, List<ItemFlag> itemFlags,
                        String headTexture, List<Material> shapelessRecipe,
                        Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers,
                        List<ConfiguredPotionEffect> passivePotionEffects,
@@ -57,6 +58,7 @@ public class TalismanItem {
         this.displayName = displayName;
         this.lore = lore;
         this.material = material;
+        this.customModelData = customModelData;
         this.glint = glint;
         this.itemFlags = itemFlags;
         this.headTexture = headTexture;
@@ -131,6 +133,11 @@ public class TalismanItem {
             // Enchantment glint
             meta.setEnchantmentGlintOverride(glint);
 
+            // Custom model data
+            if (customModelData != null) {
+                meta.setCustomModelData(customModelData);
+            }
+
             // Item flags
             itemFlags.forEach(meta::addItemFlags);
 
@@ -171,6 +178,12 @@ public class TalismanItem {
                 meta.lore(loreComponents);
             }
             meta.setEnchantmentGlintOverride(glint);
+
+            // Custom model data
+            if (customModelData != null) {
+                meta.setCustomModelData(customModelData);
+            }
+
             itemFlags.forEach(meta::addItemFlags);
 
             // Apply attributes without plugin context
@@ -249,6 +262,11 @@ public class TalismanItem {
             material = Material.TOTEM_OF_UNDYING;
         }
 
+        Integer customModelData = null;
+        if (resource != null && resource.isSet("custom_model_data")) {
+            customModelData = resource.getInt("custom_model_data");
+        }
+
         boolean glint = section.getBoolean("glint", false);
         List<ItemFlag> flags = new ArrayList<>();
         for (String flag : section.getStringList("item_flags")) {
@@ -285,7 +303,7 @@ public class TalismanItem {
         // Парсинг механик
         List<TalismanMechanic> mechanics = parseMechanics(section.getConfigurationSection("mechanics"));
 
-        return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, glint, flags, headTexture, recipe, attrModifiers,
+        return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, customModelData, glint, flags, headTexture, recipe, attrModifiers,
             passiveEffects, damageReflect, mechanics));
     }
 
