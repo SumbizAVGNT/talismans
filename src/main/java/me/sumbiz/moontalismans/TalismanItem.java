@@ -3,6 +3,7 @@ package me.sumbiz.moontalismans;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -103,14 +104,15 @@ public class TalismanItem {
 
             // Display name
             if (displayName != null) {
-                Component name = serializer().deserialize(displayName);
+                Component name = serializer().deserialize(displayName)
+                        .decoration(TextDecoration.ITALIC, false);
                 meta.displayName(name);
             }
 
             // Lore
             if (!lore.isEmpty()) {
                 List<Component> loreComponents = lore.stream()
-                        .map(serializer()::deserialize)
+                        .map(line -> serializer().deserialize(line).decoration(TextDecoration.ITALIC, false))
                         .collect(Collectors.toList());
                 meta.lore(loreComponents);
             }
@@ -147,12 +149,13 @@ public class TalismanItem {
             }
 
             if (displayName != null) {
-                Component name = serializer().deserialize(displayName);
+                Component name = serializer().deserialize(displayName)
+                        .decoration(TextDecoration.ITALIC, false);
                 meta.displayName(name);
             }
             if (!lore.isEmpty()) {
                 List<Component> loreComponents = lore.stream()
-                        .map(serializer()::deserialize)
+                        .map(line -> serializer().deserialize(line).decoration(TextDecoration.ITALIC, false))
                         .collect(Collectors.toList());
                 meta.lore(loreComponents);
             }

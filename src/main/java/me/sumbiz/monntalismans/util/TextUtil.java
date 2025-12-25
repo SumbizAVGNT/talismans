@@ -2,6 +2,7 @@ package me.sumbiz.monntalismans.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.ArrayList;
@@ -19,10 +20,10 @@ public final class TextUtil {
 
         // если похоже на minimessage
         if (s.contains("<") && s.contains(">")) {
-            try { return MM.deserialize(s); } catch (Exception ignored) {}
+            try { return MM.deserialize(s).decoration(TextDecoration.ITALIC, false); } catch (Exception ignored) {}
         }
 
-        return LEGACY.deserialize(s);
+        return LEGACY.deserialize(s).decoration(TextDecoration.ITALIC, false);
     }
 
     public static List<Component> parseList(List<String> lines) {
