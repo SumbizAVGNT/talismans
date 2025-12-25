@@ -1,32 +1,783 @@
-items:
-  talisman_speed:
-    type: talisman
-    active_in: [HOTBAR, OFFHAND, INVENTORY]
-    stacking: "NO_STACK"
-    effects:
-      potions:
-        - type: SPEED
-          amplifier: 0
-          ambient: true
-          particles: false
-          icon: true
+# ═══════════════════════════════════════════════════════════════════════════
+# MonnTalismans - Конфигурация талисманов и сфер
+# ═══════════════════════════════════════════════════════════════════════════
 
-  sphere_fire:
-    type: sphere
-    cooldown: "30s"
-    charges: 3
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWQyY..." # пример
-    on_use:
-      self_potions:
-        - type: INCREASE_DAMAGE
-          amplifier: 0
-          duration: "8s"
-      aoe:
-        radius: 6
-        potions:
-          - type: WEAKNESS
-            amplifier: 0
-            duration: "6s"
+info:
+  namespace: greek_talismans
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ПРЕДМЕТЫ
+# ═══════════════════════════════════════════════════════════════════════════
+
+items:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ТАЛИСМАНЫ (TOTEM_OF_UNDYING)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  talisman_fugu:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Фуги"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+6 Урон"
+      - "&c-2 Макс. здоровье"
+      - "&c-4 Твёрдость брони"
+      - "&c-4 Броня"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 6
+        maxHealth: -2
+        armorToughness: -4
+        armor: -4
+
+  talisman_egida:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Эгида"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+2 Броня"
+      - "&9+2 Твёрдость брони"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        armor: 2
+        armorToughness: 2
+
+  talisman_karatelya:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Карателя"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+7 Урон"
+      - "&9+10% Скорость ходьбы"
+      - "&c-4 Макс. здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 7
+        movementSpeed: 0.010
+        maxHealth: -4
+
+  talisman_kraita:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Крайта"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+4 Урон"
+      - "&9+2 Броня"
+      - "&9+2 Твёрдость брони"
+      - "&c-25% Скорость атаки"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 4
+        armor: 2
+        armorToughness: 2
+        attackSpeed: -0.025
+
+  talisman_kobry:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Кобры"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+5 Урон"
+      - "&c-4 Макс. здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 5
+        maxHealth: -4
+
+  talisman_manesa:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Манеса"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+30% Скорость атаки"
+      - "&c-2 Урон"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackSpeed: 0.030
+        attackDamage: -2
+
+  talisman_lekarya:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Лекаря"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+6 Макс. здоровье"
+      - "&c-4 Броня"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        maxHealth: 6
+        armor: -4
+
+  talisman_dionisa:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Диониса"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+2 Урон"
+      - "&9+15% Скорость атаки"
+      - "&9+10% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 2
+        attackSpeed: 0.015
+        movementSpeed: 0.010
+
+  talisman_gefesta:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Гефеста"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Урон"
+      - "&9+2 Макс. здоровье"
+      - "&9+20% Скорость атаки"
+      - "&c-50% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 3
+        maxHealth: 2
+        attackSpeed: 0.02
+        movementSpeed: -0.05
+
+  talisman_khauberka:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Хауберка"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+5 Урон"
+      - "&c-15% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 5
+        movementSpeed: -0.015
+
+  talisman_krushitelya:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Крушителя"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Урон"
+      - "&9+4 Макс. здоровье"
+      - "&9+2 Броня"
+      - "&9+2 Твёрдость брони"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 3
+        maxHealth: 4
+        armor: 2
+        armorToughness: 2
+
+  talisman_grani:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Грани"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+15% Скорость ходьбы"
+      - "&9+3 Урон"
+      - "&c-4 Макс. здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        movementSpeed: 0.015
+        attackDamage: 3
+        maxHealth: -4
+
+  talisman_dedala:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Дедала"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+5 Урон"
+      - "&c-4 Макс. здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 5
+        maxHealth: -4
+
+  talisman_tritona:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Тритона"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Защиты"
+      - "&9+2 Макс. здоровье"
+      - "&c-3 Твёрдость брони"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        armor: 3
+        maxHealth: 2
+        armorToughness: -3
+
+  talisman_garmonii:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Гармонии"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+2 Урон"
+      - "&9+2 Макс. здоровье"
+      - "&9+2 Защиты"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 2
+        maxHealth: 2
+        armor: 2
+
+  talisman_feniksa:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Феникса"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+6 Макс. здоровье"
+      - "&9+10% Скорость атаки"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        maxHealth: 6
+        attackSpeed: 0.010
+
+  talisman_ekhidny:
+    enabled: true
+    display_name: "&#f0f034Ξ &fТалисман Ехидны"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+6 Урон"
+      - "&c-2 Защиты"
+      - "&c-2 Твёрдость брони"
+      - "&c-4 Макс. здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/talisman_totem
+    attribute_modifiers:
+      offhand:
+        attackDamage: 6
+        armor: -2
+        armorToughness: -2
+        maxHealth: -4
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # СФЕРЫ (PLAYER_HEAD с текстурами)
+  # Текстуры можно найти на minecraft-heads.com
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  sphere_iaso:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Иасо"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+1 Твёрдость брони"
+      - "&9+1 Броня"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2RjYTcxZDdjMjlhMzJlMzZlMzVhZWYzOTgxMWQzYjhhYmZlMjQ3NzZhYzc3YTJjMzQyZTNhMWZiNTYifX19"
+    attribute_modifiers:
+      offhand:
+        armorToughness: 1
+        armor: 1
+
+  sphere_skifa:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Скифа"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+10% Скорость атаки"
+      - "&9+10% Скорость ходьбы"
+      - "&c-2 Броня"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzVhNWNkNTgwMzJiNGVjNmM2M2Q0ZjdhNzZhNzY5OTBlZDJlMDk2NDA2ZDY0NTg2OWQ3NzIxYjlhNjFkYyJ9fX0="
+    attribute_modifiers:
+      offhand:
+        attackSpeed: 0.01
+        movementSpeed: 0.01
+        armor: -2
+
+  sphere_abanta:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Абанты"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+2 Максимальное здоровье"
+      - "&9+1 Везение"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQxNDQ5MDk3YjRiNzlhOWY2Y2FmNjM0NDQxOGYyMDM0ZGU0YmI5NzFmZWI3YThlNGFhY2JmYjkwNWFjZGNlZiJ9fX0="
+    attribute_modifiers:
+      offhand:
+        maxHealth: 2
+        luck: 1
+
+  sphere_filona:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Филона"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+20% Скорость атаки"
+      - "&9+2 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGNjZjJmNDQ4ZWE5YjE5OGQ3NjhhMjNjMzJkMzk3NjI2OTgxNmU1MTUwZjEwNjRhNjI1MmVjZmViZWIifX19"
+    attribute_modifiers:
+      offhand:
+        attackSpeed: 0.02
+        maxHealth: 2
+
+  sphere_sorana:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Сорана"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Урон"
+      - "&9+2 Максимальное здоровье"
+      - "&c-3 Броня"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGY3M2M0NGMxYjgyOTg2ZWY1ZjM2YzM5YWM1YzlkYWNhMWU2MTdhMzk0YmU3ZCJ9fX0="
+    attribute_modifiers:
+      offhand:
+        attackDamage: 3
+        maxHealth: 2
+        armor: -3
+
+  sphere_epion:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Эпиона"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Урон"
+      - "&c-2 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjMxNjBhODlhMWE5MGU5NDQ3MzE0NDdkYjNmOTRhZmQ2YjdkNTcwNDVlODljNjFiM2Y1OWI4MWJhNThjMGZkIn19fQ=="
+    attribute_modifiers:
+      offhand:
+        attackDamage: 3
+        maxHealth: -2
+
+  sphere_afina:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Афины"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+15% Скорость ходьбы"
+      - "&9+15% Скорость атаки"
+      - "&9+3 Урон"
+      - "&c-2 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBhNzk4OWI1ZDZlNjIxYTEyMWVlZGFlNmY0NzZkMzUxOTNjOTdjNWQ1NWViYWMxMjg3MjQxOWI4OWFkIn19fQ=="
+    attribute_modifiers:
+      offhand:
+        movementSpeed: 0.015
+        attackSpeed: 0.015
+        attackDamage: 3
+        maxHealth: -2
+
+  sphere_panakea:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Панакеи"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+4 Урон"
+      - "&c-2 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI4NjJmZWRkOTcxZjZhMzYyMWViMTdhNGY2YzI4MTAzNjMwOWI2YjA0MjVjN2YyNmI1OGFmNGM1NjI4In19fQ=="
+    attribute_modifiers:
+      offhand:
+        attackDamage: 4
+        maxHealth: -2
+
+  sphere_magma:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Магмы"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+2 Броня"
+      - "&9+2 Твёрдость брони"
+      - "&c-15% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzg5NTdkNTAyM2M5MzdjNGM0MWFhMjQxMmQ0MzQxMGJkYTIzY2Y3OWE5ZjZhYjM2Yjc2ZmVmMmQ3YzQyOSJ9fX0="
+    attribute_modifiers:
+      offhand:
+        armor: 2
+        armorToughness: 2
+        movementSpeed: -0.015
+
+  sphere_teurgia:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Теургии"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+4 Урон"
+      - "&9+4 Максимальное здоровье"
+      - "&c-15% Скорость атаки"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWE2OWE4ZjhkZDBkYjk5YjgwZTNlODJkNThmOThkNGUzNjMxMmJjZTgwOGU2YzgyZjJmODQ4MTU3ZjIifX19"
+    attribute_modifiers:
+      offhand:
+        attackDamage: 4
+        maxHealth: 4
+        attackSpeed: -0.015
+
+  sphere_andromeda:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Андромеды"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+15% Скорость ходьбы"
+      - "&9+2 Защиты"
+      - "&9+3 Урона"
+      - "&c-4 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjczMzM0MTc1NDk2MjI2MTRhNDQ3OGFkMTFlMDU4ZTlhZDFjZDFhODQ5YWZkNjNkMDM2OTEyNTg1NDE5ZTMifX19"
+    attribute_modifiers:
+      offhand:
+        movementSpeed: 0.015
+        armor: 2
+        attackDamage: 3
+        maxHealth: -4
+
+  sphere_pandora:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Пандоры"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+5 Урон"
+      - "&9+10% Скорость ходьбы"
+      - "&c-2 Защиты"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDVhODYyNjNmODc4M2JmYjM5YjRlMzg1MzBhMDk3M2U0OGNmODE2ZDg3ZDE0M2I2OTQxNmNmMmM0OTE1MGEifX19"
+    attribute_modifiers:
+      offhand:
+        attackDamage: 5
+        movementSpeed: 0.010
+        armor: -2
+
+  sphere_titan:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Титана"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Броня"
+      - "&9+3 Твёрдости брони"
+      - "&c-15% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDcxMDNiNTQ1ODNhNDc4MTI5ZmE5OTJkYTE5NzE5YWI0NjcyOTQ1N2E1YjcxMzg3OWFlM2MxNTRmNzc4In19fQ=="
+    attribute_modifiers:
+      offhand:
+        armor: 3
+        armorToughness: 3
+        movementSpeed: -0.015
+
+  sphere_apollon:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Аполлона"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+4 Урон"
+      - "&c-10% Скорость ходьбы"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjFiNzM2ZTNhNmQ4ZjZlZjk0MjFlOTVlNzkxMjdmM2FhYjdkNjcxNzU0YTc5ODUyZTM5YjNhMTFkYjE4In19fQ=="
+    attribute_modifiers:
+      offhand:
+        attackDamage: 4
+        movementSpeed: -0.010
+
+  sphere_astreya:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Астреи"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+4 Максимальное здоровье"
+      - "&9+3 Урон"
+      - "&c-15% Скорость атаки"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE4YjNhZmNlMGI0MjM2NTgxZGE0NWIwNzk0NTQ1ZTg5YTNmMzE0YjZhZWQyNWM0ZWY4ZWY2NjZlZDI3In19fQ=="
+    attribute_modifiers:
+      offhand:
+        maxHealth: 4
+        attackDamage: 3
+        attackSpeed: -0.015
+
+  sphere_osiris:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Осириса"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Защиты"
+      - "&9+1 Твёрдость брони"
+      - "&c-15% Сопротивление отдаче"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTMyYTRiMmRjYzU4YjU3YzA0M2I0YTMzZTlmNGRkOTdiZjkyN2EyZDMxYTJhMzRhNWY5YjdhNTNkOTliYTYifX19"
+    attribute_modifiers:
+      offhand:
+        armor: 3
+        armorToughness: 1
+        knockbackResistance: -0.015
+
+  sphere_chimera:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Химеры"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&9+3 Урон"
+      - "&9+15% Скорость атаки"
+      - "&c-2 Максимальное здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ0MzVhMTM0YmNmMmFhOTI3YjY4MTZiMjZlMmRlNmY1MTdiMjM1YTQyMjIyNTkzNDI5N2U3MTk1NmU4In19fQ=="
+    attribute_modifiers:
+      offhand:
+        attackDamage: 3
+        attackSpeed: 0.015
+        maxHealth: -2
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ЛИМИТЫ И НАСТРОЙКИ
+# ═══════════════════════════════════════════════════════════════════════════
 
 limits:
   max_aoe_radius: 10
+  default_cooldown: "30s"
+  default_global_cooldown: "1s"

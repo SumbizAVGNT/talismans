@@ -1,40 +1,41 @@
 package me.sumbiz.monntalismans.model;
 
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.inventory.ItemFlag;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Определение сферы (голова игрока с текстурой) с атрибутами.
+ */
 public record SphereDef(
-        String nexoId,
-        boolean activatable,
-        SphereActivationMode activation,
-        long cooldownMillis,
-        long globalCooldownMillis, // 0 = взять дефолт из config.yml
-        int defaultCharges,
+        String id,
+        boolean enabled,
+        String displayName,
+        List<String> lore,
+        boolean glint,
+        Set<ItemFlag> itemFlags,
+        ResourceDef resource,
         String headTextureBase64,
-        ThrowSpec throwSpec,       // null если не THROW
-        UseSpec onUse
+        String componentsNbtFile,
+        Map<ActivationSlot, Map<Attribute, Double>> attributeModifiers,
+        long cooldownMillis,
+        int charges
 ) {
-    public record PotionTimedSpec(PotionEffectType type, int amplifier, long durationMillis) {}
-
-    public record AoeSpec(int radius, int maxTargets, List<PotionTimedSpec> potions) {}
-
-    public record ExplosionSpec(float power, boolean setFire, boolean breakBlocks) {}
-
-    public record DomeSpec(int radius, int maxTargets, long durationMillis, int periodTicks, List<PotionTimedSpec> potions) {}
-
-    public record ThrowSpec(double speed, int lifetimeTicks) {}
-
-    public record UseSpec(
-            SphereUseTarget at,
-            List<PotionTimedSpec> selfPotions,
-            AoeSpec aoe,
-            ExplosionSpec explosion,
-            DomeSpec dome
+    /**
+     * Определение ресурса/материала предмета.
+     */
+    public record ResourceDef(
+            Material material,
+            boolean generate,
+            String modelPath,
+            String fromNexoId
     ) {
-        public static UseSpec empty(SphereUseTarget at) {
-            return new UseSpec(at, Collections.emptyList(), null, null, null);
+        public static ResourceDef defaultSphere() {
+            return new ResourceDef(Material.PLAYER_HEAD, false, "minecraft:item/player_head", null);
         }
     }
 }
