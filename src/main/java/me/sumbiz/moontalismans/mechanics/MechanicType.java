@@ -157,7 +157,159 @@ public enum MechanicType {
     HEAL_ON_KILL,
 
     /** Перенаправление урона на атакующего */
-    DAMAGE_REDIRECT;
+    DAMAGE_REDIRECT,
+
+    // ========== 50 ДОПОЛНИТЕЛЬНЫХ УНИКАЛЬНЫХ МЕХАНИК ==========
+
+    /** Привязка души к локации для телепортации обратно */
+    SOUL_BIND,
+
+    /** Щит из маны/опыта, поглощающий урон за счёт опыта */
+    MANA_SHIELD,
+
+    /** Отражение снарядов обратно в стрелка */
+    REFLECT_PROJECTILES,
+
+    /** Прохождение сквозь стены на короткое время */
+    PHASE_THROUGH_WALLS,
+
+    /** Замедление времени вокруг игрока */
+    TIME_SLOW,
+
+    /** Гравитационный колодец - притяжение врагов к игроку */
+    GRAVITY_WELL,
+
+    /** Рывок с уроном по направлению взгляда */
+    DASH_ATTACK,
+
+    /** Усиление силы в ночное время (Кровавая Луна) */
+    BLOOD_MOON,
+
+    /** Усиление защиты и регенерации днём (Солнечная Вспышка) */
+    SOLAR_FLARE,
+
+    /** Иммунитет к стихийным типам урона (огонь, молния, магия) */
+    ELEMENTAL_IMMUNITY,
+
+    /** Обмен здоровья на увеличенный урон */
+    LIFE_TAP,
+
+    /** Сбор душ с убитых врагов для усиления */
+    SOUL_HARVEST,
+
+    /** Некромантия - призыв зомби из убитых мобов */
+    NECROMANCY,
+
+    /** Случайная телепортация вокруг при атаке */
+    PHASE_SHIFT,
+
+    /** Создание иллюзорных клонов игрока */
+    MIRROR_IMAGE,
+
+    /** Мгновенная телепортация в точку взгляда */
+    BLINK,
+
+    /** Прохождение сквозь мобов без столкновений */
+    SPIRIT_WALK,
+
+    /** Удар бездны - урон игнорирующий ВСЕ защиты */
+    VOID_STRIKE,
+
+    /** Хаотический урон - случайный тип стихии при ударе */
+    CHAOS_DAMAGE,
+
+    /** Проклятие врага (случайные дебаффы со временем) */
+    CURSE_ON_HIT,
+
+    /** Священная кара - повышенный урон нежити и иллагерам */
+    HOLY_SMITE,
+
+    /** Тёмный договор - сила за счёт постепенной потери HP */
+    DARK_PACT,
+
+    /** Ярость при убийстве - стаки урона */
+    RAGE_MODE,
+
+    /** Комбо-урон - каждый удар сильнее предыдущего */
+    COMBO_DAMAGE,
+
+    /** Контратака после успешного блока щитом */
+    COUNTER_ATTACK,
+
+    /** Вихревая атака - урон всем вокруг при вращении */
+    WHIRLWIND,
+
+    /** Удар по земле с АОЕ уроном и отбрасыванием */
+    GROUND_SLAM,
+
+    /** Заряжаемая атака - накопление силы перед ударом */
+    CHARGE_ATTACK,
+
+    /** Добивание - мгновенное убийство врагов с низким HP */
+    EXECUTE,
+
+    /** Рассечение - урон по нескольким целям одновременно */
+    CLEAVE,
+
+    /** Кровотечение - урон со временем */
+    BLEED_ON_HIT,
+
+    /** Иммунитет к эффекту отравления */
+    POISON_IMMUNITY,
+
+    /** Иммунитет к эффекту иссушения */
+    WITHER_IMMUNITY,
+
+    /** Иммунитет к отбрасыванию */
+    KNOCKBACK_IMMUNITY,
+
+    /** Нет урона от падения */
+    FALL_DAMAGE_IMMUNITY,
+
+    /** Иммунитет к урону от взрывов */
+    EXPLOSION_IMMUNITY,
+
+    /** Отклонение снарядов в сторону */
+    PROJECTILE_DEFLECT,
+
+    /** Магический барьер - поглощение магического урона */
+    MAGIC_BARRIER,
+
+    /** Рунный щит - временный щит при активации */
+    RUNE_SHIELD,
+
+    /** Поглощение стихийного урона для лечения */
+    ELEMENTAL_ABSORPTION,
+
+    /** Призрачная форма - неуязвимость но нельзя атаковать */
+    SPECTRAL_FORM,
+
+    /** Ледяная нова - замораживание всех вокруг */
+    FROST_NOVA,
+
+    /** Огненный взрыв вокруг игрока */
+    FLAME_BURST,
+
+    /** Ударная волна отбрасывающая врагов */
+    SHOCK_WAVE,
+
+    /** Землетрясение - урон и замедление на земле */
+    EARTHQUAKE,
+
+    /** Призыв торнадо наносящего урон */
+    TORNADO,
+
+    /** Призыв метеора с неба */
+    METEOR_STRIKE,
+
+    /** Божественное вмешательство - спасение от смерти */
+    DIVINE_INTERVENTION,
+
+    /** Превращение в демона - сила за счёт контроля */
+    DEMON_TRANSFORMATION,
+
+    /** Крылья ангела - возможность полёта */
+    ANGEL_WINGS;
 
     /**
      * Проверяет, является ли эта механика пассивной (постоянно активной).
@@ -166,7 +318,10 @@ public enum MechanicType {
         return switch (this) {
             case PASSIVE_REGEN, WATER_BREATHING, FIRE_RESISTANCE, ABSORPTION,
                  SATURATION, INVISIBILITY_ON_SNEAK, ENHANCED_JUMP, POISON_AURA,
-                 EXPERIENCE_GAIN, ITEM_MAGNET, REPAIR_EQUIPMENT -> true;
+                 EXPERIENCE_GAIN, ITEM_MAGNET, REPAIR_EQUIPMENT, BLOOD_MOON,
+                 SOLAR_FLARE, ELEMENTAL_IMMUNITY, SPIRIT_WALK, POISON_IMMUNITY,
+                 WITHER_IMMUNITY, KNOCKBACK_IMMUNITY, FALL_DAMAGE_IMMUNITY,
+                 EXPLOSION_IMMUNITY, MAGIC_BARRIER, ANGEL_WINGS, DARK_PACT -> true;
             default -> false;
         };
     }
@@ -179,7 +334,9 @@ public enum MechanicType {
             case POISON_ON_HIT, LIFESTEAL, CRITICAL_DAMAGE_BOOST, SLOWNESS_ON_HIT,
                  STUN_ON_HIT, RANDOM_DEBUFF_ON_HIT, AOE_WEAKNESS, AOE_LIFESTEAL,
                  FIRE_ON_HIT, FREEZE_ON_HIT, STEAL_EFFECTS, LIGHTNING_STRIKE,
-                 CHAIN_LIGHTNING, ARMOR_PENETRATION, ARMOR_SHRED -> true;
+                 CHAIN_LIGHTNING, ARMOR_PENETRATION, ARMOR_SHRED, PHASE_SHIFT,
+                 VOID_STRIKE, CHAOS_DAMAGE, CURSE_ON_HIT, HOLY_SMITE, COMBO_DAMAGE,
+                 WHIRLWIND, CLEAVE, BLEED_ON_HIT, LIFE_TAP, EXECUTE -> true;
             default -> false;
         };
     }
@@ -191,7 +348,9 @@ public enum MechanicType {
         return switch (this) {
             case SPEED_ON_DAMAGE, DAMAGE_REDUCTION, RESISTANCE_ON_HIT,
                  DAMAGE_REFLECT, THORNS_DAMAGE, DODGE_CHANCE, EMERGENCY_TELEPORT,
-                 SHIELD_ON_BLOCK, DAMAGE_REDIRECT -> true;
+                 SHIELD_ON_BLOCK, DAMAGE_REDIRECT, MANA_SHIELD, REFLECT_PROJECTILES,
+                 TIME_SLOW, RUNE_SHIELD, ELEMENTAL_ABSORPTION, SPECTRAL_FORM,
+                 FROST_NOVA, SHOCK_WAVE, COUNTER_ATTACK, PROJECTILE_DEFLECT -> true;
             default -> false;
         };
     }
@@ -201,7 +360,7 @@ public enum MechanicType {
      */
     public boolean triggersOnDeath() {
         return switch (this) {
-            case REVIVE_ON_DEATH, EXPLOSION_ON_DEATH -> true;
+            case REVIVE_ON_DEATH, EXPLOSION_ON_DEATH, DIVINE_INTERVENTION -> true;
             default -> false;
         };
     }

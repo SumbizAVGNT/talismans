@@ -120,7 +120,7 @@ public class TalismansCommand implements CommandExecutor, TabExecutor {
         }
         TalismanItem item = optional.get();
         for (int i = 0; i < amount; i++) {
-            target.getInventory().addItem(item.createStack());
+            target.getInventory().addItem(item.createStack(plugin));
         }
         sender.sendMessage(Component.text("Выдано " + amount + "x " + id + " игроку " + target.getName()).color(NamedTextColor.GREEN));
     }
