@@ -125,24 +125,24 @@ public class EffectManager implements Listener {
         particleIntervalTicks = Math.max(1L, effectsSection != null
             ? effectsSection.getLong("particle_interval", 10L) : 10L);
 
-        phoenixEnabled = isMechanicEnabled(mechanicsSection, "phoenix", true);
-        healerEnabled = isMechanicEnabled(mechanicsSection, "healer", true);
-        tritonEnabled = isMechanicEnabled(mechanicsSection, "triton", true);
-        graniEnabled = isMechanicEnabled(mechanicsSection, "grani", true);
-        aegisEnabled = isMechanicEnabled(mechanicsSection, "aegis", true);
-        magmaEnabled = isMechanicEnabled(mechanicsSection, "magma", true);
-        athenaEnabled = isMechanicEnabled(mechanicsSection, "athena", true);
-        theurgyEnabled = isMechanicEnabled(mechanicsSection, "theurgy", true);
-        iasoEnabled = isMechanicEnabled(mechanicsSection, "iaso", true);
-        cobraEnabled = isMechanicEnabled(mechanicsSection, "cobra", true);
-        echidnaEnabled = isMechanicEnabled(mechanicsSection, "echidna", true);
-        punisherEnabled = isMechanicEnabled(mechanicsSection, "punisher", true);
-        kraitEnabled = isMechanicEnabled(mechanicsSection, "krait", true);
-        crusherEnabled = isMechanicEnabled(mechanicsSection, "crusher", true);
-        chimeraEnabled = isMechanicEnabled(mechanicsSection, "chimera", true);
-        pandoraEnabled = isMechanicEnabled(mechanicsSection, "pandora", true);
-        titanEnabled = isMechanicEnabled(mechanicsSection, "titan", true);
-        osirisEnabled = isMechanicEnabled(mechanicsSection, "osiris", true);
+        phoenixEnabled = isMechanicEnabled(mechanicsSection, "phoenix", false);
+        healerEnabled = isMechanicEnabled(mechanicsSection, "healer", false);
+        tritonEnabled = isMechanicEnabled(mechanicsSection, "triton", false);
+        graniEnabled = isMechanicEnabled(mechanicsSection, "grani", false);
+        aegisEnabled = isMechanicEnabled(mechanicsSection, "aegis", false);
+        magmaEnabled = isMechanicEnabled(mechanicsSection, "magma", false);
+        athenaEnabled = isMechanicEnabled(mechanicsSection, "athena", false);
+        theurgyEnabled = isMechanicEnabled(mechanicsSection, "theurgy", false);
+        iasoEnabled = isMechanicEnabled(mechanicsSection, "iaso", false);
+        cobraEnabled = isMechanicEnabled(mechanicsSection, "cobra", false);
+        echidnaEnabled = isMechanicEnabled(mechanicsSection, "echidna", false);
+        punisherEnabled = isMechanicEnabled(mechanicsSection, "punisher", false);
+        kraitEnabled = isMechanicEnabled(mechanicsSection, "krait", false);
+        crusherEnabled = isMechanicEnabled(mechanicsSection, "crusher", false);
+        chimeraEnabled = isMechanicEnabled(mechanicsSection, "chimera", false);
+        pandoraEnabled = isMechanicEnabled(mechanicsSection, "pandora", false);
+        titanEnabled = isMechanicEnabled(mechanicsSection, "titan", false);
+        osirisEnabled = isMechanicEnabled(mechanicsSection, "osiris", false);
 
         phoenixLowHealthThreshold = readDouble(mechanicsSection, "phoenix.low_health_threshold", 0.3);
         phoenixReviveHealthMultiplier = readDouble(mechanicsSection, "phoenix.revive.health_multiplier", 0.3);
