@@ -152,15 +152,16 @@ public final class ConfigLoader {
 
         // Поддержка camelCase и snake_case
         return switch (key.toLowerCase(Locale.ROOT)) {
-            case "attackdamage", "attack_damage", "damage" -> Attribute.ATTACK_DAMAGE;
-            case "attackspeed", "attack_speed" -> Attribute.ATTACK_SPEED;
-            case "maxhealth", "max_health", "health" -> Attribute.MAX_HEALTH;
-            case "armor" -> Attribute.ARMOR;
-            case "armortoughness", "armor_toughness", "toughness" -> Attribute.ARMOR_TOUGHNESS;
-            case "movementspeed", "movement_speed", "speed" -> Attribute.MOVEMENT_SPEED;
-            case "luck" -> Attribute.LUCK;
-            case "knockbackresistance", "knockback_resistance" -> Attribute.KNOCKBACK_RESISTANCE;
-            case "attackknockback", "attack_knockback" -> Attribute.ATTACK_KNOCKBACK;
+            case "attackdamage", "attack_damage", "damage" -> Attribute.GENERIC_ATTACK_DAMAGE;
+            case "attackspeed", "attack_speed" -> Attribute.GENERIC_ATTACK_SPEED;
+            case "maxhealth", "max_health", "health" -> Attribute.GENERIC_MAX_HEALTH;
+            case "armor" -> Attribute.GENERIC_ARMOR;
+            case "armortoughness", "armor_toughness", "toughness" -> Attribute.GENERIC_ARMOR_TOUGHNESS;
+            case "movementspeed", "movement_speed", "speed" -> Attribute.GENERIC_MOVEMENT_SPEED;
+            case "luck" -> Attribute.GENERIC_LUCK;
+            case "knockbackresistance", "knockback_resistance" -> Attribute.GENERIC_KNOCKBACK_RESISTANCE;
+            case "attackknockback", "attack_knockback" -> Attribute.GENERIC_ATTACK_KNOCKBACK;
+            case "flyingspeed", "flying_speed" -> Attribute.GENERIC_FLYING_SPEED;
             default -> {
                 // Попробуем напрямую как Bukkit Attribute
                 try {
