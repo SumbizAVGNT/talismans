@@ -1,14 +1,15 @@
-name: MonnTalismans
-main: me.sumbiz.monntalismans.MonnTalismansPlugin
-version: 1.0.0
+name: MoonTalismans
+main: me.sumbiz.moontalismans.MoonTalismansPlugin
+version: 1.1.0
 api-version: "1.20"
 softdepend: [Nexo]
 
 commands:
   talismans:
     usage: /talismans
-    description: MonnTalismans commands
+    description: MoonTalismans commands
+    permission: moontalismans.admin
 
 permissions:
-  talismans.admin:
+  moontalismans.admin:
     default: op
