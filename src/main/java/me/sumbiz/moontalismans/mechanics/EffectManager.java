@@ -262,7 +262,7 @@ public class EffectManager implements Listener {
         if (id.contains("karatelya") || id.contains("punisher")) {
             if (player.getFallDistance() > 0 && !player.isOnGround()) {
                 event.setDamage(event.getDamage() * 1.2); // 20% extra crit damage
-                spawnHitParticles(target.getLocation(), Particle.CRIT_MAGIC);
+                spawnHitParticles(target.getLocation(), Particle.ENCHANTED_HIT);
             }
         }
 

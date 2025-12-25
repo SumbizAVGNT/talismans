@@ -178,10 +178,12 @@ public class TalismanItem {
                 Attribute attr = attrEntry.getKey();
                 double value = attrEntry.getValue();
 
-                NamespacedKey key = new NamespacedKey(plugin, id + "_" + attr.name().toLowerCase() + "_" + slot.toString().toLowerCase());
+                String keyStr = id + "_" + attr.name().toLowerCase() + "_" + slot.toString().toLowerCase();
+                UUID uuid = UUID.nameUUIDFromBytes(keyStr.getBytes(StandardCharsets.UTF_8));
 
                 AttributeModifier modifier = new AttributeModifier(
-                    key,
+                    uuid,
+                    keyStr,
                     value,
                     AttributeModifier.Operation.ADD_NUMBER,
                     slot
