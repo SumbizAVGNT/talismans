@@ -1,6 +1,7 @@
 package me.sumbiz.monntalismans.config;
 
 import me.sumbiz.monntalismans.model.*;
+import me.sumbiz.monntalismans.model.anarchy.AnarchyMechanic;
 import me.sumbiz.monntalismans.util.DurationParser;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -88,7 +89,9 @@ public final class ConfigLoader {
             SphereDef def = new SphereDef(
                     id, enabled, displayName, lore, glint, itemFlags,
                     resDef, headTexture, componentsNbt, attrModifiers,
-                    cooldown, charges
+                    cooldown, charges, true, SphereActivationMode.RIGHT_CLICK, 0L,
+                    charges, null, SphereDef.UseSpec.empty(SphereUseTarget.PLAYER),
+                    parseAnarchyMechanics(s, log, id)
             );
             return ItemDef.sphere(def);
         } else {
@@ -96,10 +99,27 @@ public final class ConfigLoader {
 
             TalismanDef def = new TalismanDef(
                     id, enabled, displayName, lore, glint, itemFlags,
-                    resDef, attrModifiers
+                    resDef, attrModifiers, Set.of(ActivationSlot.OFFHAND),
+                    TalismanStackingMode.NO_STACK, List.of(), Map.of(), Map.of(), Map.of(),
+                    parseAnarchyMechanics(s, log, id)
             );
             return ItemDef.talisman(def);
         }
+    }
+
+    private static Set<AnarchyMechanic> parseAnarchyMechanics(ConfigurationSection section, Logger log, String itemId) {
+        List<String> raw = section.getStringList("anarchy_mechanics");
+        if (raw == null || raw.isEmpty()) return Set.of();
+
+        Set<AnarchyMechanic> result = EnumSet.noneOf(AnarchyMechanic.class);
+        for (String key : raw) {
+            try {
+                result.add(AnarchyMechanic.valueOf(key.toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException e) {
+                log.warning("Unknown anarchy mechanic '" + key + "' for item " + itemId);
+            }
+        }
+        return result;
     }
 
     private static Set<ItemFlag> parseItemFlags(List<String> flags) {
@@ -152,15 +172,16 @@ public final class ConfigLoader {
 
         // Поддержка camelCase и snake_case
         return switch (key.toLowerCase(Locale.ROOT)) {
-            case "attackdamage", "attack_damage", "damage" -> Attribute.ATTACK_DAMAGE;
-            case "attackspeed", "attack_speed" -> Attribute.ATTACK_SPEED;
-            case "maxhealth", "max_health", "health" -> Attribute.MAX_HEALTH;
-            case "armor" -> Attribute.ARMOR;
-            case "armortoughness", "armor_toughness", "toughness" -> Attribute.ARMOR_TOUGHNESS;
-            case "movementspeed", "movement_speed", "speed" -> Attribute.MOVEMENT_SPEED;
-            case "luck" -> Attribute.LUCK;
-            case "knockbackresistance", "knockback_resistance" -> Attribute.KNOCKBACK_RESISTANCE;
-            case "attackknockback", "attack_knockback" -> Attribute.ATTACK_KNOCKBACK;
+            case "attackdamage", "attack_damage", "damage" -> Attribute.GENERIC_ATTACK_DAMAGE;
+            case "attackspeed", "attack_speed" -> Attribute.GENERIC_ATTACK_SPEED;
+            case "maxhealth", "max_health", "health" -> Attribute.GENERIC_MAX_HEALTH;
+            case "armor" -> Attribute.GENERIC_ARMOR;
+            case "armortoughness", "armor_toughness", "toughness" -> Attribute.GENERIC_ARMOR_TOUGHNESS;
+            case "movementspeed", "movement_speed", "speed" -> Attribute.GENERIC_MOVEMENT_SPEED;
+            case "luck" -> Attribute.GENERIC_LUCK;
+            case "knockbackresistance", "knockback_resistance" -> Attribute.GENERIC_KNOCKBACK_RESISTANCE;
+            case "attackknockback", "attack_knockback" -> Attribute.GENERIC_ATTACK_KNOCKBACK;
+            case "flyingspeed", "flying_speed" -> Attribute.GENERIC_FLYING_SPEED;
             default -> {
                 // Попробуем напрямую как Bukkit Attribute
                 try {

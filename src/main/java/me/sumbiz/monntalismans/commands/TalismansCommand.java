@@ -13,10 +13,12 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
 
     private final MonnTalismansPlugin plugin;
     private final ItemService items;
+    private final me.sumbiz.monntalismans.gui.AdminGui adminGui;
 
-    public TalismansCommand(MonnTalismansPlugin plugin, ItemService items) {
+    public TalismansCommand(MonnTalismansPlugin plugin, ItemService items, me.sumbiz.monntalismans.gui.AdminGui adminGui) {
         this.plugin = plugin;
         this.items = items;
+        this.adminGui = adminGui;
     }
 
     @Override
@@ -75,6 +77,23 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (sub.equals("gui")) {
+            if (!(sender instanceof Player p)) {
+                sender.sendMessage("§cТолько игрок.");
+                return true;
+            }
+            if (!sender.hasPermission("talismans.admin")) {
+                sender.sendMessage("§cНет прав.");
+                return true;
+            }
+            int page = 0;
+            if (args.length >= 2) {
+                try { page = Math.max(0, Integer.parseInt(args[1]) - 1); } catch (NumberFormatException ignored) {}
+            }
+            adminGui.open(p, page);
+            return true;
+        }
+
         if (sub.equals("debug") && args.length >= 2 && args[1].equalsIgnoreCase("item")) {
             if (!(sender instanceof Player p)) {
                 sender.sendMessage("§cТолько для игрока.");
@@ -90,7 +109,7 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return filter(List.of("give", "reload", "debug"), args[0]);
+        if (args.length == 1) return filter(List.of("give", "reload", "debug", "gui"), args[0]);
 
         if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
             return Bukkit.getOnlinePlayers().stream()

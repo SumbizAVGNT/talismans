@@ -14,8 +14,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public final class ItemService {
 
@@ -160,12 +162,8 @@ public final class ItemService {
 
                 NamespacedKey key = new NamespacedKey(plugin, itemId + "_" + attr.name().toLowerCase() + "_" + slot.name().toLowerCase());
 
-                AttributeModifier modifier = new AttributeModifier(
-                        key,
-                        value,
-                        operation,
-                        slot.toBukkit()
-                );
+                UUID uuid = UUID.nameUUIDFromBytes((key.toString() + slot.name()).getBytes(StandardCharsets.UTF_8));
+                AttributeModifier modifier = new AttributeModifier(uuid, key.toString(), value, operation, slot.toBukkit());
 
                 meta.addAttributeModifier(attr, modifier);
             }
