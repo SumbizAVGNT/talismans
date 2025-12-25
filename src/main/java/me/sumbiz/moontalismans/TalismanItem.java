@@ -2,6 +2,7 @@ package me.sumbiz.moontalismans;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import me.sumbiz.moontalismans.mechanics.TalismanMechanic;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -39,6 +40,7 @@ public class TalismanItem {
     private final Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers;
     private final List<ConfiguredPotionEffect> passivePotionEffects;
     private final Double damageReflect;
+    private final List<TalismanMechanic> mechanics;
 
     // Keys for PDC
     private static NamespacedKey KEY_ID;
@@ -49,7 +51,7 @@ public class TalismanItem {
                        String headTexture, List<Material> shapelessRecipe,
                        Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers,
                        List<ConfiguredPotionEffect> passivePotionEffects,
-                       Double damageReflect) {
+                       Double damageReflect, List<TalismanMechanic> mechanics) {
         this.id = id;
         this.enabled = enabled;
         this.displayName = displayName;
@@ -62,6 +64,7 @@ public class TalismanItem {
         this.attributeModifiers = attributeModifiers != null ? attributeModifiers : new HashMap<>();
         this.passivePotionEffects = passivePotionEffects != null ? passivePotionEffects : Collections.emptyList();
         this.damageReflect = damageReflect;
+        this.mechanics = mechanics != null ? mechanics : Collections.emptyList();
     }
 
     public static void initKeys(Plugin plugin) {
@@ -279,8 +282,29 @@ public class TalismanItem {
             ? effects.getDouble("damage_reflect")
             : null;
 
+        // Парсинг механик
+        List<TalismanMechanic> mechanics = parseMechanics(section.getConfigurationSection("mechanics"));
+
         return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, glint, flags, headTexture, recipe, attrModifiers,
-            passiveEffects, damageReflect));
+            passiveEffects, damageReflect, mechanics));
+    }
+
+    private static List<TalismanMechanic> parseMechanics(ConfigurationSection section) {
+        if (section == null) {
+            return Collections.emptyList();
+        }
+
+        List<TalismanMechanic> result = new ArrayList<>();
+        for (String key : section.getKeys(false)) {
+            ConfigurationSection mechanicSection = section.getConfigurationSection(key);
+            if (mechanicSection != null) {
+                TalismanMechanic mechanic = TalismanMechanic.fromConfig(mechanicSection);
+                if (mechanic != null) {
+                    result.add(mechanic);
+                }
+            }
+        }
+        return result;
     }
 
     private static Map<EquipmentSlotGroup, Map<Attribute, Double>> parseAttributeModifiers(
@@ -369,6 +393,10 @@ public class TalismanItem {
 
     public Optional<Double> getDamageReflect() {
         return Optional.ofNullable(damageReflect);
+    }
+
+    public List<TalismanMechanic> getMechanics() {
+        return mechanics;
     }
 
     private static LegacyComponentSerializer serializer() {
