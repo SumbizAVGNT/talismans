@@ -3,14 +3,17 @@ package me.sumbiz.monntalismans.service;
 import me.sumbiz.monntalismans.model.*;
 import me.sumbiz.monntalismans.util.HeadTextureUtil;
 import me.sumbiz.monntalismans.util.TextUtil;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,65 +44,131 @@ public final class ItemService {
         return items.keySet();
     }
 
+    public ItemDef getDefinition(String id) {
+        return items.get(id);
+    }
+
     public ItemStack create(String id, int amount) {
         ItemDef def = items.get(id);
         if (def == null) return null;
 
-        ItemStack base = buildTemplate(def);
-        if (base == null) return null;
+        ItemStack item = buildBaseItem(def);
+        if (item == null) return null;
 
-        applyCommonMeta(base, def);
-        base.setAmount(Math.max(1, amount));
-        return base;
+        applyMeta(item, def);
+        item.setAmount(Math.max(1, amount));
+        return item;
     }
 
-    private ItemStack buildTemplate(ItemDef itemDef) {
-        TemplateDef t = (itemDef instanceof ItemDef.Sphere s) ? s.def().template() : ((ItemDef.Talisman)itemDef).def().template();
+    private ItemStack buildBaseItem(ItemDef itemDef) {
+        if (itemDef instanceof ItemDef.Sphere s) {
+            SphereDef.ResourceDef res = s.def().resource();
+            return buildFromResource(res.material(), res.fromNexoId());
+        } else if (itemDef instanceof ItemDef.Talisman t) {
+            TalismanDef.ResourceDef res = t.def().resource();
+            return buildFromResource(res.material(), res.fromNexoId());
+        }
+        return null;
+    }
 
-        // 1) если есть Nexo и указан fromNexoId — берём itemstack оттуда как “внешку”
-        if (t.fromNexoId() != null && !t.fromNexoId().isBlank() && nexo.isAvailable()) {
-            ItemStack nexoItem = nexo.buildItem(t.fromNexoId());
+    private ItemStack buildFromResource(Material material, String fromNexoId) {
+        // Сначала пробуем Nexo
+        if (fromNexoId != null && !fromNexoId.isBlank() && nexo.isAvailable()) {
+            ItemStack nexoItem = nexo.buildItem(fromNexoId);
             if (nexoItem != null) return nexoItem;
         }
-
-        // 2) fallback
-        return new ItemStack(t.material());
+        return new ItemStack(material);
     }
 
-    private void applyCommonMeta(ItemStack item, ItemDef def) {
+    private void applyMeta(ItemStack item, ItemDef def) {
+        if (def instanceof ItemDef.Sphere s) {
+            applySphere(item, s.def());
+        } else if (def instanceof ItemDef.Talisman t) {
+            applyTalisman(item, t.def());
+        }
+    }
+
+    private void applySphere(ItemStack item, SphereDef sd) {
+        // Сначала применяем текстуру головы (если есть)
+        if (sd.headTextureBase64() != null && !sd.headTextureBase64().isBlank()) {
+            HeadTextureUtil.applyBase64IfSkull(item, sd.headTextureBase64());
+        }
+
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
-        if (def instanceof ItemDef.Sphere s) {
-            SphereDef sd = s.def();
+        // Имя и описание
+        meta.displayName(TextUtil.parse(sd.displayName()));
+        meta.lore(TextUtil.parseList(sd.lore()));
 
-            meta.displayName(TextUtil.parse(sd.name()));
-            meta.lore(TextUtil.parseList(sd.lore()));
+        // Свечение
+        meta.setEnchantmentGlintOverride(sd.glint());
 
-            // если это голова — применяем base64
-            if (sd.headTextureBase64() != null && !sd.headTextureBase64().isBlank()) {
-                // важно: применяем на item, а не на meta отдельно
-                item.setItemMeta(meta);
-                HeadTextureUtil.applyBase64IfSkull(item, sd.headTextureBase64());
-                meta = item.getItemMeta();
-                if (meta == null) return;
-            }
-
-            meta.getPersistentDataContainer().set(kId, PersistentDataType.STRING, sd.id());
-            meta.getPersistentDataContainer().set(kType, PersistentDataType.STRING, ItemType.SPHERE.name());
-            item.setItemMeta(meta);
-            return;
+        // Флаги предмета
+        for (ItemFlag flag : sd.itemFlags()) {
+            meta.addItemFlags(flag);
         }
 
-        if (def instanceof ItemDef.Talisman t) {
-            TalismanDef td = t.def();
+        // Атрибуты
+        applyAttributes(meta, sd.attributeModifiers(), sd.id());
 
-            meta.displayName(TextUtil.parse(td.name()));
-            meta.lore(TextUtil.parseList(td.lore()));
+        // PDC
+        meta.getPersistentDataContainer().set(kId, PersistentDataType.STRING, sd.id());
+        meta.getPersistentDataContainer().set(kType, PersistentDataType.STRING, ItemType.SPHERE.name());
 
-            meta.getPersistentDataContainer().set(kId, PersistentDataType.STRING, td.id());
-            meta.getPersistentDataContainer().set(kType, PersistentDataType.STRING, ItemType.TALISMAN.name());
-            item.setItemMeta(meta);
+        item.setItemMeta(meta);
+    }
+
+    private void applyTalisman(ItemStack item, TalismanDef td) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        // Имя и описание
+        meta.displayName(TextUtil.parse(td.displayName()));
+        meta.lore(TextUtil.parseList(td.lore()));
+
+        // Свечение
+        meta.setEnchantmentGlintOverride(td.glint());
+
+        // Флаги предмета
+        for (ItemFlag flag : td.itemFlags()) {
+            meta.addItemFlags(flag);
+        }
+
+        // Атрибуты
+        applyAttributes(meta, td.attributeModifiers(), td.id());
+
+        // PDC
+        meta.getPersistentDataContainer().set(kId, PersistentDataType.STRING, td.id());
+        meta.getPersistentDataContainer().set(kType, PersistentDataType.STRING, ItemType.TALISMAN.name());
+
+        item.setItemMeta(meta);
+    }
+
+    private void applyAttributes(ItemMeta meta, Map<ActivationSlot, Map<Attribute, Double>> modifiers, String itemId) {
+        if (modifiers == null || modifiers.isEmpty()) return;
+
+        for (Map.Entry<ActivationSlot, Map<Attribute, Double>> slotEntry : modifiers.entrySet()) {
+            ActivationSlot slot = slotEntry.getKey();
+            Map<Attribute, Double> attrs = slotEntry.getValue();
+
+            for (Map.Entry<Attribute, Double> attrEntry : attrs.entrySet()) {
+                Attribute attr = attrEntry.getKey();
+                double value = attrEntry.getValue();
+
+                AttributeModifier.Operation operation = AttributeModifier.Operation.ADD_NUMBER;
+
+                NamespacedKey key = new NamespacedKey(plugin, itemId + "_" + attr.name().toLowerCase() + "_" + slot.name().toLowerCase());
+
+                AttributeModifier modifier = new AttributeModifier(
+                        key,
+                        value,
+                        operation,
+                        slot.toBukkit()
+                );
+
+                meta.addAttributeModifier(attr, modifier);
+            }
         }
     }
 
@@ -113,8 +182,40 @@ public final class ItemService {
         String id = meta.getPersistentDataContainer().get(kId, PersistentDataType.STRING);
         String type = meta.getPersistentDataContainer().get(kType, PersistentDataType.STRING);
 
-        return "§eMonnTalismans: id=§f" + (id == null ? "(none)" : id) +
-                " §etype=§f" + (type == null ? "(none)" : type) +
-                " §7material=" + it.getType();
+        StringBuilder sb = new StringBuilder();
+        sb.append("§eMonnTalismans: id=§f").append(id == null ? "(none)" : id);
+        sb.append(" §etype=§f").append(type == null ? "(none)" : type);
+        sb.append(" §7material=").append(it.getType());
+
+        if (meta.hasAttributeModifiers()) {
+            sb.append("\n§eAttributes:");
+            for (var entry : meta.getAttributeModifiers().entries()) {
+                sb.append("\n  §7").append(entry.getKey().name())
+                  .append(": §f").append(entry.getValue().getAmount())
+                  .append(" (").append(entry.getValue().getSlotGroup()).append(")");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public String getItemId(ItemStack item) {
+        if (item == null || item.getType().isAir()) return null;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+        return meta.getPersistentDataContainer().get(kId, PersistentDataType.STRING);
+    }
+
+    public ItemType getItemType(ItemStack item) {
+        if (item == null || item.getType().isAir()) return null;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+        String type = meta.getPersistentDataContainer().get(kType, PersistentDataType.STRING);
+        if (type == null) return null;
+        try {
+            return ItemType.valueOf(type);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }
