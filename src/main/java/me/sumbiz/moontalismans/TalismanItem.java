@@ -19,6 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -35,6 +37,8 @@ public class TalismanItem {
     private final String headTexture;
     private final List<Material> shapelessRecipe;
     private final Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers;
+    private final List<ConfiguredPotionEffect> passivePotionEffects;
+    private final Double damageReflect;
 
     // Keys for PDC
     private static NamespacedKey KEY_ID;
@@ -43,7 +47,9 @@ public class TalismanItem {
     public TalismanItem(String id, boolean enabled, String displayName, List<String> lore,
                        Material material, boolean glint, List<ItemFlag> itemFlags,
                        String headTexture, List<Material> shapelessRecipe,
-                       Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers) {
+                       Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers,
+                       List<ConfiguredPotionEffect> passivePotionEffects,
+                       Double damageReflect) {
         this.id = id;
         this.enabled = enabled;
         this.displayName = displayName;
@@ -54,6 +60,8 @@ public class TalismanItem {
         this.headTexture = headTexture;
         this.shapelessRecipe = shapelessRecipe;
         this.attributeModifiers = attributeModifiers != null ? attributeModifiers : new HashMap<>();
+        this.passivePotionEffects = passivePotionEffects != null ? passivePotionEffects : Collections.emptyList();
+        this.damageReflect = damageReflect;
     }
 
     public static void initKeys(Plugin plugin) {
@@ -265,7 +273,14 @@ public class TalismanItem {
             section.getConfigurationSection("attribute_modifiers"), id
         );
 
-        return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, glint, flags, headTexture, recipe, attrModifiers));
+        ConfigurationSection effects = section.getConfigurationSection("effects");
+        List<ConfiguredPotionEffect> passiveEffects = parsePassiveEffects(effects);
+        Double damageReflect = effects != null && effects.isSet("damage_reflect")
+            ? effects.getDouble("damage_reflect")
+            : null;
+
+        return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, glint, flags, headTexture, recipe, attrModifiers,
+            passiveEffects, damageReflect));
     }
 
     private static Map<EquipmentSlotGroup, Map<Attribute, Double>> parseAttributeModifiers(
@@ -348,8 +363,63 @@ public class TalismanItem {
         return attributeModifiers;
     }
 
+    public List<ConfiguredPotionEffect> getPassivePotionEffects() {
+        return passivePotionEffects;
+    }
+
+    public Optional<Double> getDamageReflect() {
+        return Optional.ofNullable(damageReflect);
+    }
+
     private static LegacyComponentSerializer serializer() {
         return LegacyComponentSerializer.builder().character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+    }
+
+    public record ConfiguredPotionEffect(PotionEffectType type, int durationTicks, int amplifier,
+                                         boolean ambient, boolean particles, boolean icon) {
+        public PotionEffect toPotionEffect() {
+            return new PotionEffect(type, durationTicks, amplifier, ambient, particles, icon);
+        }
+    }
+
+    private static List<ConfiguredPotionEffect> parsePassiveEffects(ConfigurationSection section) {
+        if (section == null) {
+            return Collections.emptyList();
+        }
+
+        List<Map<?, ?>> raw = section.getMapList("passive_potions");
+        if (raw == null || raw.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<ConfiguredPotionEffect> effects = new ArrayList<>();
+        for (Map<?, ?> entry : raw) {
+            Object typeObj = entry.get("type");
+            if (!(typeObj instanceof String typeStr)) {
+                continue;
+            }
+
+            PotionEffectType type = PotionEffectType.getByName(typeStr.toUpperCase(Locale.ROOT));
+            if (type == null) {
+                continue;
+            }
+
+            Object durationObj = entry.containsKey("duration") ? entry.get("duration") : 200;
+            Object amplifierObj = entry.containsKey("amplifier") ? entry.get("amplifier") : 0;
+            Object ambientObj = entry.containsKey("ambient") ? entry.get("ambient") : true;
+            Object particlesObj = entry.containsKey("particles") ? entry.get("particles") : false;
+            Object iconObj = entry.containsKey("icon") ? entry.get("icon") : true;
+
+            int duration = durationObj instanceof Number number ? number.intValue() : 200;
+            int amplifier = amplifierObj instanceof Number number ? number.intValue() : 0;
+            boolean ambient = ambientObj instanceof Boolean bool ? bool : true;
+            boolean particles = particlesObj instanceof Boolean bool ? bool : false;
+            boolean icon = iconObj instanceof Boolean bool ? bool : true;
+
+            effects.add(new ConfiguredPotionEffect(type, duration, amplifier, ambient, particles, icon));
+        }
+
+        return effects;
     }
 
     @Override

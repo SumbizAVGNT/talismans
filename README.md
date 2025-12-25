@@ -141,6 +141,15 @@ items:
         attackDamage: 5
         maxHealth: -2
         armor: 2
+    effects:
+      passive_potions:
+        - type: NIGHT_VISION
+          duration: 300
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
+      damage_reflect: 0.15
 ```
 
 ### Доступные атрибуты
