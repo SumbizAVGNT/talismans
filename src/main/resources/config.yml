@@ -1,0 +1,32 @@
+items:
+  talisman_speed:
+    type: talisman
+    active_in: [HOTBAR, OFFHAND, INVENTORY]
+    stacking: "NO_STACK"
+    effects:
+      potions:
+        - type: SPEED
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
+
+  sphere_fire:
+    type: sphere
+    cooldown: "30s"
+    charges: 3
+    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWQyY..." # пример
+    on_use:
+      self_potions:
+        - type: INCREASE_DAMAGE
+          amplifier: 0
+          duration: "8s"
+      aoe:
+        radius: 6
+        potions:
+          - type: WEAKNESS
+            amplifier: 0
+            duration: "6s"
+
+limits:
+  max_aoe_radius: 10

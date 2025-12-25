@@ -1,0 +1,14 @@
+name: MonnTalismans
+main: me.sumbiz.monntalismans.MonnTalismansPlugin
+version: 1.0.0
+api-version: "1.20"
+softdepend: [Nexo]
+
+commands:
+  talismans:
+    usage: /talismans
+    description: MonnTalismans commands
+
+permissions:
+  talismans.admin:
+    default: op
