@@ -89,8 +89,8 @@ public class RecipeEditorMenu implements InventoryHolder {
                         lore.addAll(meta.lore());
                     }
                     lore.add(Component.empty());
-                    lore.add(Component.text("§7━━━━━━━━━━━━━━━━━━━━"));
-                    lore.add(Component.text("§e⚡ Результат крафта"));
+                    lore.add(Component.text("━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+                    lore.add(Component.text("⚡ Результат крафта").color(NamedTextColor.YELLOW));
                     meta.lore(lore);
                     preview.setItemMeta(meta);
                 }
@@ -120,9 +120,9 @@ public class RecipeEditorMenu implements InventoryHolder {
                     .decoration(TextDecoration.ITALIC, false)
                     .decoration(TextDecoration.BOLD, true));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Нажмите для сохранения рецепта"));
+            lore.add(Component.text("Нажмите для сохранения рецепта").color(NamedTextColor.GRAY));
             lore.add(Component.empty());
-            lore.add(Component.text("§8Рецепт сохранится в config.yml"));
+            lore.add(Component.text("Рецепт сохранится в config.yml").color(NamedTextColor.DARK_GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -137,7 +137,7 @@ public class RecipeEditorMenu implements InventoryHolder {
                     .color(NamedTextColor.YELLOW)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Вернуться к списку"));
+            lore.add(Component.text("Вернуться к списку").color(NamedTextColor.GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -152,7 +152,7 @@ public class RecipeEditorMenu implements InventoryHolder {
                     .color(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Убрать все ингредиенты"));
+            lore.add(Component.text("Убрать все ингредиенты").color(NamedTextColor.GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -167,11 +167,11 @@ public class RecipeEditorMenu implements InventoryHolder {
                     .color(NamedTextColor.AQUA)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Разместите ингредиенты"));
-            lore.add(Component.text("§7в сетке 3x3 слева"));
+            lore.add(Component.text("Разместите ингредиенты").color(NamedTextColor.GRAY));
+            lore.add(Component.text("в сетке 3x3 слева").color(NamedTextColor.GRAY));
             lore.add(Component.empty());
-            lore.add(Component.text("§eРецепт будет бесформенным"));
-            lore.add(Component.text("§7(порядок не важен)"));
+            lore.add(Component.text("Рецепт будет бесформенным").color(NamedTextColor.YELLOW));
+            lore.add(Component.text("(порядок не важен)").color(NamedTextColor.GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -186,8 +186,8 @@ public class RecipeEditorMenu implements InventoryHolder {
                     .color(NamedTextColor.GOLD)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Будет создан новый предмет"));
-            lore.add(Component.text("§7в config.yml"));
+            lore.add(Component.text("Будет создан новый предмет").color(NamedTextColor.GRAY));
+            lore.add(Component.text("в config.yml").color(NamedTextColor.GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -230,7 +230,7 @@ public class RecipeEditorMenu implements InventoryHolder {
             for (int s : INGREDIENT_SLOTS) {
                 inventory.setItem(s, null);
             }
-            player.sendMessage("§e⚠ Ингредиенты очищены");
+            player.sendMessage(Component.text("⚠ Ингредиенты очищены").color(NamedTextColor.YELLOW));
             return;
         }
     }
@@ -257,23 +257,28 @@ public class RecipeEditorMenu implements InventoryHolder {
         }
 
         if (materials.isEmpty()) {
-            player.sendMessage("§c✗ Рецепт пуст! Добавьте хотя бы один ингредиент.");
+            player.sendMessage(Component.text("✗ Рецепт пуст! Добавьте хотя бы один ингредиент.").color(NamedTextColor.RED));
             return;
         }
 
         String targetId = editingId;
         if (targetId == null) {
             targetId = "custom_" + System.currentTimeMillis();
-            player.sendMessage("§e⚠ Создан новый предмет: §f" + targetId);
-            player.sendMessage("§7Настройте его в config.yml для изменения имени и атрибутов.");
+            player.sendMessage(Component.text("⚠ Создан новый предмет: ").color(NamedTextColor.YELLOW)
+                    .append(Component.text(targetId).color(NamedTextColor.WHITE)));
+            player.sendMessage(Component.text("Настройте его в config.yml для изменения имени и атрибутов.").color(NamedTextColor.GRAY));
         }
 
         plugin.getItemManager().saveShapelessRecipe(targetId, materials);
 
         String finalId = targetId;
         plugin.getItemManager().getItem(targetId).ifPresentOrElse(
-            item -> player.sendMessage("§a✓ Рецепт сохранён для §f" + item.getId() + " §7(" + materials.size() + " ингредиентов)"),
-            () -> player.sendMessage("§a✓ Рецепт сохранён для §f" + finalId + " §7(" + materials.size() + " ингредиентов)")
+            item -> player.sendMessage(Component.text("✓ Рецепт сохранён для ").color(NamedTextColor.GREEN)
+                    .append(Component.text(item.getId()).color(NamedTextColor.WHITE))
+                    .append(Component.text(" (" + materials.size() + " ингредиентов)").color(NamedTextColor.GRAY))),
+            () -> player.sendMessage(Component.text("✓ Рецепт сохранён для ").color(NamedTextColor.GREEN)
+                    .append(Component.text(finalId).color(NamedTextColor.WHITE))
+                    .append(Component.text(" (" + materials.size() + " ингредиентов)").color(NamedTextColor.GRAY)))
         );
 
         // Clear ingredient slots before opening new menu

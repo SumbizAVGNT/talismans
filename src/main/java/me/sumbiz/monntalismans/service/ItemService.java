@@ -3,6 +3,8 @@ package me.sumbiz.monntalismans.service;
 import me.sumbiz.monntalismans.model.*;
 import me.sumbiz.monntalismans.util.HeadTextureUtil;
 import me.sumbiz.monntalismans.util.TextUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
@@ -170,31 +172,39 @@ public final class ItemService {
         }
     }
 
-    public String debugItemInHand(Player p) {
+    public Component debugItemInHand(Player p) {
         ItemStack it = p.getInventory().getItemInMainHand();
-        if (it == null || it.getType().isAir()) return "§eВ руке пусто.";
+        if (it == null || it.getType().isAir()) {
+            return Component.text("В руке пусто.").color(NamedTextColor.YELLOW);
+        }
 
         ItemMeta meta = it.getItemMeta();
-        if (meta == null) return "§eНет меты.";
+        if (meta == null) {
+            return Component.text("Нет меты.").color(NamedTextColor.YELLOW);
+        }
 
         String id = meta.getPersistentDataContainer().get(kId, PersistentDataType.STRING);
         String type = meta.getPersistentDataContainer().get(kType, PersistentDataType.STRING);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("§eMonnTalismans: id=§f").append(id == null ? "(none)" : id);
-        sb.append(" §etype=§f").append(type == null ? "(none)" : type);
-        sb.append(" §7material=").append(it.getType());
+        Component result = Component.text("MonnTalismans: id=").color(NamedTextColor.YELLOW)
+                .append(Component.text(id == null ? "(none)" : id).color(NamedTextColor.WHITE))
+                .append(Component.text(" type=").color(NamedTextColor.YELLOW))
+                .append(Component.text(type == null ? "(none)" : type).color(NamedTextColor.WHITE))
+                .append(Component.text(" material=").color(NamedTextColor.GRAY))
+                .append(Component.text(it.getType().toString()).color(NamedTextColor.WHITE));
 
         if (meta.hasAttributeModifiers()) {
-            sb.append("\n§eAttributes:");
+            result = result.append(Component.newline())
+                    .append(Component.text("Attributes:").color(NamedTextColor.YELLOW));
             for (var entry : meta.getAttributeModifiers().entries()) {
-                sb.append("\n  §7").append(entry.getKey().name())
-                  .append(": §f").append(entry.getValue().getAmount())
-                  .append(" (").append(entry.getValue().getSlotGroup()).append(")");
+                result = result.append(Component.newline())
+                        .append(Component.text("  " + entry.getKey().name() + ": ").color(NamedTextColor.GRAY))
+                        .append(Component.text(String.valueOf(entry.getValue().getAmount())).color(NamedTextColor.WHITE))
+                        .append(Component.text(" (" + entry.getValue().getSlotGroup() + ")").color(NamedTextColor.GRAY));
             }
         }
 
-        return sb.toString();
+        return result;
     }
 
     public String getItemId(ItemStack item) {
