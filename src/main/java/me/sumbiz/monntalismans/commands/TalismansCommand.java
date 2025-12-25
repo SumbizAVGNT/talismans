@@ -2,6 +2,8 @@ package me.sumbiz.monntalismans.commands;
 
 import me.sumbiz.monntalismans.MonnTalismansPlugin;
 import me.sumbiz.monntalismans.service.ItemService;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -23,9 +25,9 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (args.length == 0) {
-            sender.sendMessage("§e/talismans give <player> <id> [amount]");
-            sender.sendMessage("§e/talismans reload");
-            sender.sendMessage("§e/talismans debug item");
+            sender.sendMessage(Component.text("/talismans give <player> <id> [amount]").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans reload").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans debug item").color(NamedTextColor.YELLOW));
             return true;
         }
 
@@ -33,28 +35,28 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
 
         if (sub.equals("reload")) {
             if (!sender.hasPermission("talismans.admin")) {
-                sender.sendMessage("§cНет прав.");
+                sender.sendMessage(Component.text("Нет прав.").color(NamedTextColor.RED));
                 return true;
             }
             plugin.reloadConfig();
             plugin.reloadLocal();
-            sender.sendMessage("§aПерезагружено.");
+            sender.sendMessage(Component.text("Перезагружено.").color(NamedTextColor.GREEN));
             return true;
         }
 
         if (sub.equals("give")) {
             if (!sender.hasPermission("talismans.admin")) {
-                sender.sendMessage("§cНет прав.");
+                sender.sendMessage(Component.text("Нет прав.").color(NamedTextColor.RED));
                 return true;
             }
             if (args.length < 3) {
-                sender.sendMessage("§cИспользование: /talismans give <player> <id> [amount]");
+                sender.sendMessage(Component.text("Использование: /talismans give <player> <id> [amount]").color(NamedTextColor.RED));
                 return true;
             }
 
             Player target = Bukkit.getPlayerExact(args[1]);
             if (target == null) {
-                sender.sendMessage("§cИгрок не найден/оффлайн.");
+                sender.sendMessage(Component.text("Игрок не найден/оффлайн.").color(NamedTextColor.RED));
                 return true;
             }
 
@@ -66,25 +68,25 @@ public final class TalismansCommand implements CommandExecutor, TabCompleter {
 
             var item = items.create(id, amount);
             if (item == null) {
-                sender.sendMessage("§cНеизвестный id в config.yml: " + id);
+                sender.sendMessage(Component.text("Неизвестный id в config.yml: " + id).color(NamedTextColor.RED));
                 return true;
             }
 
             target.getInventory().addItem(item);
-            sender.sendMessage("§aВыдано: " + id + " x" + amount + " -> " + target.getName());
+            sender.sendMessage(Component.text("Выдано: " + id + " x" + amount + " -> " + target.getName()).color(NamedTextColor.GREEN));
             return true;
         }
 
         if (sub.equals("debug") && args.length >= 2 && args[1].equalsIgnoreCase("item")) {
             if (!(sender instanceof Player p)) {
-                sender.sendMessage("§cТолько для игрока.");
+                sender.sendMessage(Component.text("Только для игрока.").color(NamedTextColor.RED));
                 return true;
             }
             sender.sendMessage(items.debugItemInHand(p));
             return true;
         }
 
-        sender.sendMessage("§cНеизвестная команда.");
+        sender.sendMessage(Component.text("Неизвестная команда.").color(NamedTextColor.RED));
         return true;
     }
 

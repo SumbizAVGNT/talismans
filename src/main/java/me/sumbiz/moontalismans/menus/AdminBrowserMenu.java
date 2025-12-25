@@ -59,19 +59,26 @@ public class AdminBrowserMenu implements InventoryHolder {
                     lore.addAll(meta.lore());
                 }
                 lore.add(Component.empty());
-                lore.add(Component.text("§7━━━━━━━━━━━━━━━━━━━━"));
-                lore.add(Component.text("§e▶ ЛКМ: §fвыдать себе"));
-                lore.add(Component.text("§e▶ ПКМ: §fнастроить крафт"));
+                lore.add(Component.text("━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+                lore.add(Component.text("▶ ЛКМ: ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("выдать себе").color(NamedTextColor.WHITE)));
+                lore.add(Component.text("▶ ПКМ: ").color(NamedTextColor.YELLOW)
+                        .append(Component.text("настроить крафт").color(NamedTextColor.WHITE)));
                 if (!item.getShapelessRecipe().isEmpty()) {
-                    lore.add(Component.text("§a✓ §7Рецепт: " + item.getShapelessRecipe().size() + " ингредиентов"));
+                    lore.add(Component.text("✓ ").color(NamedTextColor.GREEN)
+                            .append(Component.text("Рецепт: " + item.getShapelessRecipe().size() + " ингредиентов").color(NamedTextColor.GRAY)));
                 } else {
-                    lore.add(Component.text("§c✗ §7Рецепт не настроен"));
+                    lore.add(Component.text("✗ ").color(NamedTextColor.RED)
+                            .append(Component.text("Рецепт не настроен").color(NamedTextColor.GRAY)));
                 }
-                lore.add(Component.text("§7ID: §8" + item.getId()));
+                lore.add(Component.text("ID: ").color(NamedTextColor.GRAY)
+                        .append(Component.text(item.getId()).color(NamedTextColor.DARK_GRAY)));
                 if (!item.getAttributeModifiers().isEmpty()) {
                     int attrCount = item.getAttributeModifiers().values().stream()
                             .mapToInt(m -> m.size()).sum();
-                    lore.add(Component.text("§b⚔ §7Атрибутов: §f" + attrCount));
+                    lore.add(Component.text("⚔ ").color(NamedTextColor.AQUA)
+                            .append(Component.text("Атрибутов: ").color(NamedTextColor.GRAY))
+                            .append(Component.text(String.valueOf(attrCount)).color(NamedTextColor.WHITE)));
                 }
                 meta.lore(lore);
                 display.setItemMeta(meta);
@@ -116,11 +123,14 @@ public class AdminBrowserMenu implements InventoryHolder {
                     .color(NamedTextColor.AQUA)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Всего предметов: §f" + entries.size()));
+            lore.add(Component.text("Всего предметов: ").color(NamedTextColor.GRAY)
+                    .append(Component.text(String.valueOf(entries.size())).color(NamedTextColor.WHITE)));
             long talismans = entries.stream().filter(i -> !i.isSphere()).count();
             long spheres = entries.stream().filter(TalismanItem::isSphere).count();
-            lore.add(Component.text("§7Талисманов: §e" + talismans));
-            lore.add(Component.text("§7Сфер: §b" + spheres));
+            lore.add(Component.text("Талисманов: ").color(NamedTextColor.GRAY)
+                    .append(Component.text(String.valueOf(talismans)).color(NamedTextColor.YELLOW)));
+            lore.add(Component.text("Сфер: ").color(NamedTextColor.GRAY)
+                    .append(Component.text(String.valueOf(spheres)).color(NamedTextColor.AQUA)));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -135,8 +145,8 @@ public class AdminBrowserMenu implements InventoryHolder {
                     .color(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, false));
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("§7Нажмите чтобы перезагрузить"));
-            lore.add(Component.text("§7конфигурацию плагина"));
+            lore.add(Component.text("Нажмите чтобы перезагрузить").color(NamedTextColor.GRAY));
+            lore.add(Component.text("конфигурацию плагина").color(NamedTextColor.GRAY));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
@@ -182,7 +192,7 @@ public class AdminBrowserMenu implements InventoryHolder {
         // Reload config
         if (slot == 51) {
             plugin.getItemManager().reload();
-            player.sendMessage("§a✓ Конфигурация перезагружена! Загружено предметов: " + plugin.getItemManager().getItems().size());
+            player.sendMessage(Component.text("✓ Конфигурация перезагружена! Загружено предметов: " + plugin.getItemManager().getItems().size()).color(NamedTextColor.GREEN));
             player.openInventory(new AdminBrowserMenu(plugin, 0).build());
             return;
         }
@@ -196,7 +206,8 @@ public class AdminBrowserMenu implements InventoryHolder {
             if (event.isLeftClick()) {
                 ItemStack stack = item.createStack(plugin);
                 player.getInventory().addItem(stack);
-                player.sendMessage("§a✓ Выдан: §f" + item.getId());
+                player.sendMessage(Component.text("✓ Выдан: ").color(NamedTextColor.GREEN)
+                        .append(Component.text(item.getId()).color(NamedTextColor.WHITE)));
             } else if (event.isRightClick()) {
                 player.openInventory(new RecipeEditorMenu(plugin, item.getId()).build());
             }

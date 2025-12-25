@@ -7,6 +7,8 @@ import me.sumbiz.monntalismans.nexo.mechanics.SphereMechanicFactory;
 import me.sumbiz.monntalismans.nexo.mechanics.TalismanMechanic;
 import me.sumbiz.monntalismans.nexo.mechanics.TalismanMechanicFactory;
 import me.sumbiz.monntalismans.util.HeadTextureUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -224,7 +226,7 @@ public final class PlayerStateService implements Listener {
                 if (d.world != null && d.world.equals(at.getWorld())) count++;
             }
             if (count >= worldLimit) {
-                owner.sendMessage("§cСлишком много куполов в мире (лимит).");
+                owner.sendMessage(Component.text("Слишком много куполов в мире (лимит).").color(NamedTextColor.RED));
                 return;
             }
         }
@@ -366,7 +368,7 @@ public final class PlayerStateService implements Listener {
             Long gUntil = p.getPersistentDataContainer().get(kGlobalCooldownUntil, PersistentDataType.LONG);
             if (gUntil != null && gUntil > now) {
                 long left = gUntil - now;
-                p.sendMessage("§cГлобальный кулдаун: " + (left / 1000.0) + "s");
+                p.sendMessage(Component.text("Глобальный кулдаун: " + (left / 1000.0) + "s").color(NamedTextColor.RED));
                 return;
             }
         }
@@ -379,7 +381,7 @@ public final class PlayerStateService implements Listener {
         Long cdUntil = itemPdc.get(kCooldownUntil, PersistentDataType.LONG);
         if (cdUntil != null && cdUntil > now) {
             long leftMs = cdUntil - now;
-            p.sendMessage("§cКулдаун сферы: " + (leftMs / 1000.0) + "s");
+            p.sendMessage(Component.text("Кулдаун сферы: " + (leftMs / 1000.0) + "s").color(NamedTextColor.RED));
             return;
         }
 
@@ -387,7 +389,7 @@ public final class PlayerStateService implements Listener {
         if (charges == null) charges = s.defaultCharges();
 
         if (charges <= 0) {
-            p.sendMessage("§cНет зарядов.");
+            p.sendMessage(Component.text("Нет зарядов.").color(NamedTextColor.RED));
             return;
         }
 
@@ -425,9 +427,10 @@ public final class PlayerStateService implements Listener {
                 }
             }
 
-            p.sendMessage("§eСфера использована. Заряды закончились.");
+            p.sendMessage(Component.text("Сфера использована. Заряды закончились.").color(NamedTextColor.YELLOW));
         } else {
-            p.sendMessage("§eСфера использована. Осталось зарядов: §f" + newCharges);
+            p.sendMessage(Component.text("Сфера использована. Осталось зарядов: ").color(NamedTextColor.YELLOW)
+                    .append(Component.text(String.valueOf(newCharges)).color(NamedTextColor.WHITE)));
         }
     }
 

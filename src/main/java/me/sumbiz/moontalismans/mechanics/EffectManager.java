@@ -2,6 +2,9 @@ package me.sumbiz.moontalismans.mechanics;
 
 import me.sumbiz.moontalismans.MoonTalismansPlugin;
 import me.sumbiz.moontalismans.TalismanItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -371,7 +374,9 @@ public class EffectManager implements Listener {
                     player.playSound(loc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.5f);
 
                     setCooldown(player, "phoenix_revive", 300000); // 5 minute cooldown
-                    player.sendMessage("§c§l⚔ §eТалисман Феникса спас вас от смерти! §7(Кулдаун: 5 минут)");
+                    player.sendMessage(Component.text("⚔ ").color(NamedTextColor.RED).decoration(TextDecoration.BOLD, true)
+                            .append(Component.text("Талисман Феникса спас вас от смерти! ").color(NamedTextColor.YELLOW).decoration(TextDecoration.BOLD, false))
+                            .append(Component.text("(Кулдаун: 5 минут)").color(NamedTextColor.GRAY)));
                 }
             }
         }

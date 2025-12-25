@@ -2,6 +2,8 @@ package me.sumbiz.moontalismans;
 
 import me.sumbiz.moontalismans.menus.AdminBrowserMenu;
 import me.sumbiz.moontalismans.TalismanItem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,15 +27,15 @@ public class TalismansCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("moontalismans.admin")) {
-            sender.sendMessage("§cНедостаточно прав (moontalismans.admin)");
+            sender.sendMessage(Component.text("Недостаточно прав (moontalismans.admin)").color(NamedTextColor.RED));
             return true;
         }
         if (args.length == 0) {
-            sender.sendMessage("§e/talismans give <id> [amount] [player]");
-            sender.sendMessage("§e/talismans list");
-            sender.sendMessage("§e/talismans reload");
-            sender.sendMessage("§e/talismans debug");
-            sender.sendMessage("§e/talismans gui [page]");
+            sender.sendMessage(Component.text("/talismans give <id> [amount] [player]").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans list").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans reload").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans debug").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("/talismans gui [page]").color(NamedTextColor.YELLOW));
             return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
@@ -42,14 +44,14 @@ public class TalismansCommand implements CommandExecutor, TabExecutor {
             case "reload" -> reload(sender);
             case "debug" -> debug(sender);
             case "gui" -> gui(sender, args);
-            default -> sender.sendMessage("§cНеизвестная подкоманда");
+            default -> sender.sendMessage(Component.text("Неизвестная подкоманда").color(NamedTextColor.RED));
         }
         return true;
     }
 
     private void gui(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cТолько игрок может открыть GUI");
+            sender.sendMessage(Component.text("Только игрок может открыть GUI").color(NamedTextColor.RED));
             return;
         }
         int page = 0;
@@ -64,36 +66,36 @@ public class TalismansCommand implements CommandExecutor, TabExecutor {
 
     private void debug(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("§cКоманда только для игроков");
+            sender.sendMessage(Component.text("Команда только для игроков").color(NamedTextColor.RED));
             return;
         }
         if (player.getInventory().getItemInMainHand().getType().isAir()) {
-            sender.sendMessage("§cДержите предмет в руке");
+            sender.sendMessage(Component.text("Держите предмет в руке").color(NamedTextColor.RED));
             return;
         }
-        sender.sendMessage("§7Тип предмета: " + player.getInventory().getItemInMainHand().getType());
-        sender.sendMessage("§7Метаданные: " + player.getInventory().getItemInMainHand().getItemMeta());
+        sender.sendMessage(Component.text("Тип предмета: " + player.getInventory().getItemInMainHand().getType()).color(NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Метаданные: " + player.getInventory().getItemInMainHand().getItemMeta()).color(NamedTextColor.GRAY));
     }
 
     private void reload(CommandSender sender) {
         plugin.getItemManager().reload();
-        sender.sendMessage("§aКонфигурация перезагружена. Загружено " + plugin.getItemManager().getItems().size() + " предметов.");
+        sender.sendMessage(Component.text("Конфигурация перезагружена. Загружено " + plugin.getItemManager().getItems().size() + " предметов.").color(NamedTextColor.GREEN));
     }
 
     private void list(CommandSender sender) {
         Map<String, TalismanItem> items = plugin.getItemManager().getItems();
-        sender.sendMessage("§7Доступные предметы: " + String.join(", ", items.keySet()));
+        sender.sendMessage(Component.text("Доступные предметы: " + String.join(", ", items.keySet())).color(NamedTextColor.GRAY));
     }
 
     private void give(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage("§cИспользование: /talismans give <id> [amount] [player]");
+            sender.sendMessage(Component.text("Использование: /talismans give <id> [amount] [player]").color(NamedTextColor.RED));
             return;
         }
         String id = args[1];
         Optional<TalismanItem> optional = plugin.getItemManager().getItem(id);
         if (optional.isEmpty()) {
-            sender.sendMessage("§cНеизвестный предмет " + id);
+            sender.sendMessage(Component.text("Неизвестный предмет " + id).color(NamedTextColor.RED));
             return;
         }
         int amount = 1;
@@ -107,20 +109,20 @@ public class TalismansCommand implements CommandExecutor, TabExecutor {
         if (args.length >= 4) {
             target = Bukkit.getPlayer(args[3]);
             if (target == null) {
-                sender.sendMessage("§cИгрок не найден");
+                sender.sendMessage(Component.text("Игрок не найден").color(NamedTextColor.RED));
                 return;
             }
         } else if (sender instanceof Player player) {
             target = player;
         } else {
-            sender.sendMessage("§cУкажите игрока");
+            sender.sendMessage(Component.text("Укажите игрока").color(NamedTextColor.RED));
             return;
         }
         TalismanItem item = optional.get();
         for (int i = 0; i < amount; i++) {
             target.getInventory().addItem(item.createStack());
         }
-        sender.sendMessage("§aВыдано " + amount + "x " + id + " игроку " + target.getName());
+        sender.sendMessage(Component.text("Выдано " + amount + "x " + id + " игроку " + target.getName()).color(NamedTextColor.GREEN));
     }
 
     @Override
