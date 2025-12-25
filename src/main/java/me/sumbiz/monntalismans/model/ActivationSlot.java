@@ -14,7 +14,9 @@ public enum ActivationSlot {
     LEGS(EquipmentSlotGroup.LEGS),
     FEET(EquipmentSlotGroup.FEET),
     ARMOR(EquipmentSlotGroup.ARMOR),
-    ANY(EquipmentSlotGroup.ANY);
+    ANY(EquipmentSlotGroup.ANY),
+    HOTBAR(EquipmentSlotGroup.ANY),
+    INVENTORY(EquipmentSlotGroup.ANY);
 
     private final EquipmentSlotGroup bukkitSlot;
 
@@ -37,6 +39,8 @@ public enum ActivationSlot {
             case "legs", "leggings" -> LEGS;
             case "feet", "boots" -> FEET;
             case "armor" -> ARMOR;
+            case "hotbar" -> HOTBAR;
+            case "inventory", "inv" -> INVENTORY;
             case "any" -> ANY;
             default -> OFFHAND;
         };

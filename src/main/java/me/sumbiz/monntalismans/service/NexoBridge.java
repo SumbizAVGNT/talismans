@@ -25,6 +25,14 @@ public final class NexoBridge {
         return available;
     }
 
+    public void registerMechanics() {
+        // В старой версии регистрировались фабрики механик, здесь оставляем заглушку
+    }
+
+    public void refreshItems() {
+        // Место для синхронизации предметов после пересборки Nexo
+    }
+
     public ItemStack buildItem(String nexoId) {
         if (!available) return null;
         try {

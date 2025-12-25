@@ -13,12 +13,13 @@ public final class MonnTalismansPlugin extends JavaPlugin {
 
     private Map<String, ItemDef> items;
     private ItemService itemService;
+    private NexoBridge nexo;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
 
-        NexoBridge nexo = new NexoBridge(this);
+        this.nexo = new NexoBridge(this);
         this.items = ConfigLoader.load(getConfig(), getLogger());
         this.itemService = new ItemService(this, items, nexo);
 
@@ -35,5 +36,18 @@ public final class MonnTalismansPlugin extends JavaPlugin {
     public void reloadLocal() {
         this.items = ConfigLoader.load(getConfig(), getLogger());
         this.itemService.reload(items);
+    }
+
+    // Хуки для интеграции с Nexo
+    public void registerOurMechanics() {
+        if (nexo != null) {
+            nexo.registerMechanics();
+        }
+    }
+
+    public void onNexoItemsLoaded() {
+        if (nexo != null) {
+            nexo.refreshItems();
+        }
     }
 }
