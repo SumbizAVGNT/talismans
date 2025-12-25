@@ -109,6 +109,8 @@ public class EffectManager implements Listener {
     private void applyBuiltInPassiveEffects(Player player, TalismanItem item) {
         String id = item.getId().toLowerCase();
 
+        applyConfiguredPassivePotions(player, item);
+
         // Феникс - регенерация при низком здоровье
         if (id.contains("feniksa") || id.contains("phoenix")) {
             if (player.getHealth() < player.getMaxHealth() * 0.3) {
@@ -154,11 +156,6 @@ public class EffectManager implements Listener {
             }
         }
 
-        // Ночное зрение для сфер с "astreya" или "osiris"
-        if (id.contains("astreya") || id.contains("osiris")) {
-            player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 300, 0, true, false, true));
-        }
-
         // Теургия - дополнительное поглощение
         if (id.contains("teurgia") || id.contains("theurgy")) {
             if (!player.hasPotionEffect(PotionEffectType.ABSORPTION)) {
@@ -169,6 +166,12 @@ public class EffectManager implements Listener {
         // Иасо - усиленное исцеление
         if (id.contains("iaso")) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 60, 0, true, false, true));
+        }
+    }
+
+    private void applyConfiguredPassivePotions(Player player, TalismanItem item) {
+        for (TalismanItem.ConfiguredPotionEffect effect : item.getPassivePotionEffects()) {
+            player.addPotionEffect(effect.toPotionEffect());
         }
     }
 
@@ -381,14 +384,13 @@ public class EffectManager implements Listener {
             }
         }
 
-        // Осирис - отражение урона
-        if (id.contains("osiris") && event instanceof EntityDamageByEntityEvent ede) {
-            if (ede.getDamager() instanceof LivingEntity attacker) {
-                double reflect = event.getDamage() * 0.15; // 15% reflect
+        item.getDamageReflect().ifPresent(reflectMultiplier -> {
+            if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
+                double reflect = event.getDamage() * reflectMultiplier;
                 attacker.damage(reflect, player);
                 player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
             }
-        }
+        });
     }
 
     @EventHandler

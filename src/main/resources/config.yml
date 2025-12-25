@@ -423,6 +423,14 @@ items:
       offhand:
         armorToughness: 1
         armor: 1
+    effects:
+      passive_potions:
+        - type: SATURATION
+          duration: 60
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
 
   skifa:
     enabled: true
@@ -601,6 +609,14 @@ items:
         armor: 2
         armorToughness: 2
         movementSpeed: -0.015
+    effects:
+      passive_potions:
+        - type: FIRE_RESISTANCE
+          duration: 60
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
 
   teurgia:
     enabled: true
@@ -624,6 +640,14 @@ items:
         attackDamage: 4
         maxHealth: 4
         attackSpeed: -0.015
+    effects:
+      passive_potions:
+        - type: ABSORPTION
+          duration: 200
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
 
   andromeda:
     enabled: true
@@ -739,6 +763,14 @@ items:
         maxHealth: 4
         attackDamage: 3
         attackSpeed: -0.015
+    effects:
+      passive_potions:
+        - type: NIGHT_VISION
+          duration: 300
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
 
   osiris:
     enabled: true
@@ -762,6 +794,15 @@ items:
         armor: 3
         armorToughness: 1
         knockbackResistance: -0.015
+    effects:
+      passive_potions:
+        - type: NIGHT_VISION
+          duration: 300
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
+      damage_reflect: 0.15
 
   chimera:
     enabled: true
