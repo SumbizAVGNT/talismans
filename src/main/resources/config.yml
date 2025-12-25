@@ -365,6 +365,10 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+6 Макс. здоровье"
       - "&9+10% Скорость атаки"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Возрождение при смерти"
+      - "&5➤ Регенерация при низком HP"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -376,6 +380,27 @@ items:
       offhand:
         maxHealth: 6
         attackSpeed: 0.010
+    mechanics:
+      revive:
+        type: REVIVE_ON_DEATH
+        enabled: true
+        health_multiplier: 0.30
+        cooldown: 300000
+        effects:
+          - type: REGENERATION
+            duration: 100
+            amplifier: 2
+          - type: FIRE_RESISTANCE
+            duration: 100
+            amplifier: 0
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.3
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 1
 
   talisman_ekhidny:
     enabled: true
@@ -387,6 +412,10 @@ items:
       - "&c-2 Защиты"
       - "&c-2 Твёрдость брони"
       - "&c-4 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ 15% вампиризм от урона"
+      - "&5➤ AOE вампиризм (4 блока)"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -400,6 +429,16 @@ items:
         armor: -2
         armorToughness: -2
         maxHealth: -4
+    mechanics:
+      lifesteal:
+        type: LIFESTEAL
+        enabled: true
+        percent: 0.15
+      aoe_lifesteal:
+        type: AOE_LIFESTEAL
+        enabled: true
+        radius: 4.0
+        percent: 0.10
 
   iaso:
     enabled: true
@@ -747,6 +786,10 @@ items:
       - "&9+3 Защиты"
       - "&9+15% Отдача"
       - "&c-15% Защиты отдачи"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ 15% отражение урона"
+      - "&5➤ Шипы (2 урона за атаку)"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -760,6 +803,15 @@ items:
         armor: 3
         armorToughness: 1
         knockbackResistance: -0.015
+    mechanics:
+      reflect:
+        type: DAMAGE_REFLECT
+        enabled: true
+        percent: 0.15
+      thorns:
+        type: THORNS_DAMAGE
+        enabled: true
+        damage: 2.0
 
   chimera:
     enabled: true
@@ -770,6 +822,10 @@ items:
       - "&9+3 Урон"
       - "&9+15% Скорость атаки"
       - "&c-2 Максимальное здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ 35% случайный дебафф"
+      - "&5➤ 10% призыв молнии"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -783,6 +839,18 @@ items:
         attackDamage: 3
         attackSpeed: 0.015
         maxHealth: -2
+    mechanics:
+      random_debuff:
+        type: RANDOM_DEBUFF_ON_HIT
+        enabled: true
+        chance: 0.35
+        duration: 60
+        amplifier: 0
+      lightning:
+        type: LIGHTNING_STRIKE
+        enabled: true
+        chance: 0.10
+        damage: 5.0
 
 effects:
   passive_effects_enabled: false

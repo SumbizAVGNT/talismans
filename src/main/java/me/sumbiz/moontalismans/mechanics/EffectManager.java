@@ -37,6 +37,7 @@ public class EffectManager implements Listener {
     private final MoonTalismansPlugin plugin;
     private final NamespacedKey keyId;
     private final NamespacedKey keyType;
+    private final MechanicEngine mechanicEngine;
 
     private final boolean passiveEffectsEnabled;
     private final boolean particlesEnabled;
@@ -111,6 +112,7 @@ public class EffectManager implements Listener {
         this.plugin = plugin;
         this.keyId = new NamespacedKey(plugin, "talisman_id");
         this.keyType = new NamespacedKey(plugin, "talisman_type");
+        this.mechanicEngine = new MechanicEngine(plugin);
 
         ConfigurationSection effectsSection = plugin.getConfig().getConfigurationSection("effects");
         ConfigurationSection mechanicsSection = effectsSection != null
@@ -279,6 +281,9 @@ public class EffectManager implements Listener {
 
         // Apply built-in passive effects based on item ID patterns
         applyBuiltInPassiveEffects(player, item);
+
+        // Apply new mechanic system
+        mechanicEngine.applyPassiveMechanics(player, item);
     }
 
     /**
@@ -494,6 +499,9 @@ public class EffectManager implements Listener {
                 spawnHitParticles(target.getLocation(), Particle.SCULK_CHARGE_POP);
             }
         }
+
+        // Apply new mechanic system
+        mechanicEngine.handleAttackMechanics(player, target, event, item);
     }
 
     private void applyRandomChimeraEffect(LivingEntity target) {
@@ -571,6 +579,17 @@ public class EffectManager implements Listener {
             }
         }
 
+        // Check death mechanics from new system
+        if (player.getHealth() - event.getFinalDamage() <= 0) {
+            if (mechanicEngine.handleDeathMechanics(player, event, item)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        // Apply damage mechanics from new system
+        mechanicEngine.handleDamageMechanics(player, event, item);
+
         if (osirisEnabled) {
             double reflectMultiplier = item.getDamageReflect().orElse(osirisReflect);
             if (reflectMultiplier > 0 && event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
@@ -631,6 +650,7 @@ public class EffectManager implements Listener {
         if (particleTask != null) {
             particleTask.cancel();
         }
+        mechanicEngine.cleanup();
         cooldowns.clear();
         activeEffects.clear();
     }
