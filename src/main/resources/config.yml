@@ -1,49 +1,7 @@
-# ═══════════════════════════════════════════════════════════════════════════
-# MoonTalismans v2.0 - Конфигурация греческих талисманов и сфер
-# ═══════════════════════════════════════════════════════════════════════════
-#
-# Талисманы и сферы предоставляют пассивные бонусы при держании во второстепенной руке.
-# Каждый предмет имеет уникальные атрибуты и специальные эффекты.
-#
-# УНИКАЛЬНЫЕ МЕХАНИКИ:
-# • Феникс - возрождение при смерти (кулдаун 5 минут)
-# • Кобра - 30% шанс отравить цель при ударе
-# • Ехидна - 15% вампиризм (восстановление здоровья от урона)
-# • Каратель - +20% урон при критических ударах
-# • Крайт - 25% шанс замедлить цель
-# • Крушитель - 20% шанс оглушить цель
-# • Химера - случайные негативные эффекты при ударе
-# • Пандора - AOE ослабление противников
-# • Эгида - -10% получаемого урона + сопротивление
-# • Грани - ускорение при получении урона
-# • Титан - дополнительная защита при ударе
-# • Осирис - 15% отражение урона
-# • Тритон - водное дыхание и грация дельфина под водой
-# • Магма - огнестойкость
-# • Афина - сила при низком здоровье
-# • Астрея/Осирис - ночное зрение
-# • Теургия - поглощение урона
-# • Иасо - насыщение
-# • Лекарь - медленная регенерация
-#
-# ПАРТИКЛЫ:
-# Сферы и талисманы создают уникальные визуальные эффекты вокруг игрока.
-# ═══════════════════════════════════════════════════════════════════════════
-
 info:
   namespace: greek_talismans
 
-# ═══════════════════════════════════════════════════════════════════════════
-# ПРЕДМЕТЫ
-# ═══════════════════════════════════════════════════════════════════════════
-
 items:
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # ТАЛИСМАНЫ (TOTEM_OF_UNDYING)
-  # Пассивные бонусы при держании во второстепенной руке
-  # ═══════════════════════════════════════════════════════════════════════════
-
   talisman_fugu:
     enabled: true
     display_name: "&#f0f034Ξ &fТалисман Фуги"
@@ -76,8 +34,6 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+2 Броня"
       - "&9+2 Твёрдость брони"
-      - "&d⚔ -10% получаемого урона"
-      - "&d⚔ Сопротивление"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -99,7 +55,6 @@ items:
       - "&9+7 Урон"
       - "&9+10% Скорость ходьбы"
       - "&c-4 Макс. здоровье"
-      - "&d⚔ +20% урон при критах"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -123,7 +78,6 @@ items:
       - "&9+2 Броня"
       - "&9+2 Твёрдость брони"
       - "&c-25% Скорость атаки"
-      - "&d⚔ 25% шанс замедления"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -146,7 +100,6 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+5 Урон"
       - "&c-4 Макс. здоровье"
-      - "&d⚔ 30% шанс отравления"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -187,7 +140,6 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+6 Макс. здоровье"
       - "&c-4 Броня"
-      - "&d⚔ Пассивная регенерация"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -276,7 +228,6 @@ items:
       - "&9+4 Макс. здоровье"
       - "&9+2 Броня"
       - "&9+2 Твёрдость брони"
-      - "&d⚔ 20% шанс оглушения"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -300,7 +251,6 @@ items:
       - "&9+15 Скорость ходьбы"
       - "&9+3 Урон"
       - "&c-4 Макс. здоровье"
-      - "&d⚔ Ускорение при получении урона"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -343,8 +293,6 @@ items:
       - "&9+3 Защиты"
       - "&9+2 Макс. здоровье"
       - "&c-3 Твёрдость брони"
-      - "&d⚔ Водное дыхание под водой"
-      - "&d⚔ Грация дельфина"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -388,9 +336,6 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+6 Макс. здоровье"
       - "&9+10% Скорость атаки"
-      - "&d⚔ Возрождение при смерти"
-      - "&d⚔ Регенерация при низком HP"
-      - "&8Кулдаун возрождения: 5 минут"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -413,7 +358,6 @@ items:
       - "&c-2 Защиты"
       - "&c-2 Твёрдость брони"
       - "&c-4 Макс. здоровье"
-      - "&d⚔ 15% вампиризм"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -428,10 +372,7 @@ items:
         armorToughness: -2
         maxHealth: -4
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # СФЕРЫ (PLAYER_HEAD с 3D-моделями)
-  # Декоративные головы с уникальными текстурами
-  # ═══════════════════════════════════════════════════════════════════════════
+  # ---------- СФЕРЫ (3D-модели, ItemsAdder) ----------
 
   iaso:
     enabled: true
@@ -441,7 +382,6 @@ items:
       - "&7Когда во второстпеной руке:"
       - "&9+1 Твердость брони"
       - "&9+1 Броня"
-      - "&d⚔ Пассивное насыщение"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -449,7 +389,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2RjYTcxZDdjMjlhMzJlMzZlMzVhZWYzOTgxMWQzYjhhYmZlMjQ3NzZhYzc3YTJjMzQyZTNhMWZiNTYifX19"
+    components_nbt_file: "sphere_iaso.json"
     attribute_modifiers:
       offhand:
         armorToughness: 1
@@ -471,7 +411,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzVhNWNkNTgwMzJiNGVjNmM2M2Q0ZjdhNzZhNzY5OTBlZDJlMDk2NDA2ZDY0NTg2OWQ3NzIxYjlhNjFkYyJ9fX0="
+    components_nbt_file: "sphere_skifa.json"
     attribute_modifiers:
       offhand:
         attackSpeed: 0.01
@@ -493,7 +433,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQxNDQ5MDk3YjRiNzlhOWY2Y2FmNjM0NDQxOGYyMDM0ZGU0YmI5NzFmZWI3YThlNGFhY2JmYjkwNWFjZGNlZiJ9fX0="
+    components_nbt_file: "sphere_abanta.json"
     attribute_modifiers:
       offhand:
         maxHealth: 2
@@ -514,7 +454,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGNjZjJmNDQ4ZWE5YjE5OGQ3NjhhMjNjMzJkMzk3NjI2OTgxNmU1MTUwZjEwNjRhNjI1MmVjZmViZWIifX19"
+    components_nbt_file: "sphere_filona.json"
     attribute_modifiers:
       offhand:
         attackSpeed: 0.02
@@ -536,7 +476,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGY3M2M0NGMxYjgyOTg2ZWY1ZjM2YzM5YWM1YzlkYWNhMWU2MTdhMzk0YmU3ZCJ9fX0="
+    components_nbt_file: "sphere_sorana.json"
     attribute_modifiers:
       offhand:
         attackDamage: 3
@@ -558,7 +498,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjMxNjBhODlhMWE5MGU5NDQ3MzE0NDdkYjNmOTRhZmQ2YjdkNTcwNDVlODljNjFiM2Y1OWI4MWJhNThjMGZkIn19fQ=="
+    components_nbt_file: "sphere_epion.json"
     attribute_modifiers:
       offhand:
         attackDamage: 3
@@ -574,7 +514,6 @@ items:
       - "&9+15% Скорость атаки"
       - "&9+3 Урон"
       - "&c-2 Максимальное здоровье"
-      - "&d⚔ Сила при низком HP"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -582,7 +521,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTBhNzk4OWI1ZDZlNjIxYTEyMWVlZGFlNmY0NzZkMzUxOTNjOTdjNWQ1NWViYWMxMjg3MjQxOWI4OWFkIn19fQ=="
+    components_nbt_file: "sphere_afina.json"
     attribute_modifiers:
       offhand:
         movementSpeed: 0.015
@@ -605,7 +544,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI4NjJmZWRkOTcxZjZhMzYyMWViMTdhNGY2YzI4MTAzNjMwOWI2YjA0MjVjN2YyNmI1OGFmNGM1NjI4In19fQ=="
+    components_nbt_file: "sphere_panakea.json"
     attribute_modifiers:
       offhand:
         attackDamage: 4
@@ -620,7 +559,6 @@ items:
       - "&9+2 Броня"
       - "&9+2 Твердость брони"
       - "&c-15% Скорость ходьбы"
-      - "&d⚔ Огнестойкость"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -628,7 +566,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzg5NTdkNTAyM2M5MzdjNGM0MWFhMjQxMmQ0MzQxMGJkYTIzY2Y3OWE5ZjZhYjM2Yjc2ZmVmMmQ3YzQyOSJ9fX0="
+    components_nbt_file: "sphere_magma.json"
     attribute_modifiers:
       offhand:
         armor: 2
@@ -644,7 +582,6 @@ items:
       - "&9+4 Урон"
       - "&9+4 Максимальное здоровье"
       - "&c-15% Скорость атаки"
-      - "&d⚔ Поглощение урона"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -652,7 +589,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWE2OWE4ZjhkZDBkYjk5YjgwZTNlODJkNThmOThkNGUzNjMxMmJjZTgwOGU2YzgyZjJmODQ4MTU3ZjIifX19"
+    components_nbt_file: "sphere_teurgia.json"
     attribute_modifiers:
       offhand:
         attackDamage: 4
@@ -676,7 +613,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjczMzM0MTc1NDk2MjI2MTRhNDQ3OGFkMTFlMDU4ZTlhZDFjZDFhODQ5YWZkNjNkMDM2OTEyNTg1NDE5ZTMifX19"
+    components_nbt_file: "sphere_andromeda.json"
     attribute_modifiers:
       offhand:
         movementSpeed: 0.015
@@ -693,7 +630,6 @@ items:
       - "&9+25% Урон"
       - "&9+10% Скорость ходьбы"
       - "&c-10% Защиты"
-      - "&d⚔ AOE ослабление врагов"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -701,7 +637,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDVhODYyNjNmODc4M2JmYjM5YjRlMzg1MzBhMDk3M2U0OGNmODE2ZDg3ZDE0M2I2OTQxNmNmMmM0OTE1MGEifX19"
+    components_nbt_file: "sphere_pandora.json"
     attribute_modifiers:
       offhand:
         attackDamage: 5
@@ -717,7 +653,6 @@ items:
       - "&9+3 Броня"
       - "&9+3 Твёрдости брони"
       - "&c-15% Скорость ходьбы"
-      - "&d⚔ Дополнительная защита"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -725,7 +660,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDcxMDNiNTQ1ODNhNDc4MTI5ZmE5OTJkYTE5NzE5YWI0NjcyOTQ1N2E1YjcxMzg3OWFlM2MxNTRmNzc4In19fQ=="
+    components_nbt_file: "sphere_titan.json"
     attribute_modifiers:
       offhand:
         armor: 3
@@ -747,7 +682,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjFiNzM2ZTNhNmQ4ZjZlZjk0MjFlOTVlNzkxMjdmM2FhYjdkNjcxNzU0YTc5ODUyZTM5YjNhMTFkYjE4In19fQ=="
+    components_nbt_file: "sphere_apollon.json"
     attribute_modifiers:
       offhand:
         attackDamage: 4
@@ -762,7 +697,6 @@ items:
       - "&9+4 Максимальное здоровье"
       - "&9+3 Урон"
       - "&c-15% Скорость атаки"
-      - "&d⚔ Ночное зрение"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -770,7 +704,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE4YjNhZmNlMGI0MjM2NTgxZGE0NWIwNzk0NTQ1ZTg5YTNmMzE0YjZhZWQyNWM0ZWY4ZWY2NjZlZDI3In19fQ=="
+    components_nbt_file: "sphere_astreya.json"
     attribute_modifiers:
       offhand:
         maxHealth: 4
@@ -786,8 +720,6 @@ items:
       - "&9+3 Защиты"
       - "&9+15% Отдача"
       - "&c-15% Защиты отдачи"
-      - "&d⚔ 15% отражение урона"
-      - "&d⚔ Ночное зрение"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -795,7 +727,7 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTMyYTRiMmRjYzU4YjU3YzA0M2I0YTMzZTlmNGRkOTdiZjkyN2EyZDMxYTJhMzRhNWY5YjdhNTNkOTliYTYifX19"
+    components_nbt_file: "sphere_osiris.json"
     attribute_modifiers:
       offhand:
         armor: 3
@@ -811,7 +743,6 @@ items:
       - "&9+3 Урон"
       - "&9+15% Скорость атаки"
       - "&c-2 Максимальное здоровье"
-      - "&d⚔ 35% случайные эффекты"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -819,53 +750,9 @@ items:
       material: PLAYER_HEAD
       generate: false
       model_path: "minecraft:item/player_head"
-    head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ0MzVhMTM0YmNmMmFhOTI3YjY4MTZiMjZlMmRlNmY1MTdiMjM1YTQyMjIyNTkzNDI5N2U3MTk1NmU4In19fQ=="
+    components_nbt_file: "sphere_chimera.json"
     attribute_modifiers:
       offhand:
         attackDamage: 3
         attackSpeed: 0.015
         maxHealth: -2
-
-# ═══════════════════════════════════════════════════════════════════════════
-# НАСТРОЙКИ ЭФФЕКТОВ
-# ═══════════════════════════════════════════════════════════════════════════
-
-effects:
-  # Включить систему пассивных эффектов
-  passive_effects_enabled: true
-
-  # Включить визуальные эффекты частиц
-  particles_enabled: true
-
-  # Интервал обновления эффектов (тики, 20 = 1 секунда)
-  effect_refresh_interval: 40
-
-  # Интервал частиц (тики)
-  particle_interval: 10
-
-  # Кулдаун способности Феникса (миллисекунды)
-  phoenix_cooldown: 300000
-
-  # Шансы специальных эффектов
-  chances:
-    cobra_poison: 0.30
-    krait_slow: 0.25
-    crusher_stun: 0.20
-    chimera_random: 0.35
-    pandora_aoe: 0.25
-
-  # Множители эффектов
-  multipliers:
-    echidna_lifesteal: 0.15
-    punisher_crit_bonus: 1.20
-    aegis_damage_reduction: 0.90
-    osiris_reflect: 0.15
-
-# ═══════════════════════════════════════════════════════════════════════════
-# ЛИМИТЫ И НАСТРОЙКИ
-# ═══════════════════════════════════════════════════════════════════════════
-
-limits:
-  max_aoe_radius: 10
-  default_cooldown: "30s"
-  default_global_cooldown: "1s"
