@@ -174,7 +174,7 @@ public class MechanicEngine {
     private void applyPassiveRegen(Player player, TalismanMechanic mechanic) {
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -183,7 +183,7 @@ public class MechanicEngine {
         if (player.getHealth() < player.getMaxHealth() * threshold) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
         }
     }
@@ -192,17 +192,17 @@ public class MechanicEngine {
         if (player.isInWater()) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
             // Dolphins Grace
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 100, 0, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
     private void applyFireResistance(Player player, TalismanMechanic mechanic) {
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -210,7 +210,7 @@ public class MechanicEngine {
         if (!player.hasPotionEffect(PotionEffectType.ABSORPTION)) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
         }
     }
@@ -218,7 +218,7 @@ public class MechanicEngine {
     private void applySaturation(Player player, TalismanMechanic mechanic) {
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -227,20 +227,20 @@ public class MechanicEngine {
         if (player.getHealth() < player.getMaxHealth() * threshold) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+                player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
         }
     }
 
     private void applyEnhancedJump(Player player, TalismanMechanic mechanic) {
         int amplifier = mechanic.getInt("amplifier", 1);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, amplifier, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, amplifier, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applyInvisibilityOnSneak(Player player, TalismanMechanic mechanic) {
         if (player.isSneaking()) {
             int duration = mechanic.getInt("duration", 100);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, duration, 0, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, duration, 0, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -250,7 +250,7 @@ public class MechanicEngine {
         if (effect != null) {
             for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
                 if (entity instanceof LivingEntity target && entity != player) {
-                    target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, true, true));
+                    target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
                 }
             }
         }
@@ -282,7 +282,7 @@ public class MechanicEngine {
         if (Math.random() < chance) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, true, true));
+                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
                 spawnHitParticles(target.getLocation(), Particle.WITCH);
             }
         }
@@ -293,7 +293,7 @@ public class MechanicEngine {
         if (Math.random() < chance) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
-                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, true, true));
+                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
                 spawnHitParticles(target.getLocation(), Particle.SNOWFLAKE);
             }
         }
@@ -322,7 +322,7 @@ public class MechanicEngine {
         if (Math.random() < chance) {
             List<TalismanMechanic.PotionEffectConfig> effects = mechanic.getPotionEffectList("effects");
             for (TalismanMechanic.PotionEffectConfig effect : effects) {
-                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, true, true));
+                target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
             spawnHitParticles(target.getLocation(), Particle.SONIC_BOOM);
         }
@@ -366,7 +366,7 @@ public class MechanicEngine {
             if (effect != null) {
                 for (Entity entity : target.getNearbyEntities(radius, radius, radius)) {
                     if (entity instanceof LivingEntity living) {
-                        living.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, true, true));
+                        living.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
                     }
                 }
                 spawnHitParticles(target.getLocation(), Particle.SCULK_CHARGE_POP);
@@ -462,7 +462,7 @@ public class MechanicEngine {
     private void handleSpeedOnDamage(Player player, TalismanMechanic mechanic) {
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -483,7 +483,7 @@ public class MechanicEngine {
     private void handleResistanceOnHit(Player player, TalismanMechanic mechanic) {
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -523,7 +523,7 @@ public class MechanicEngine {
     private void handleShieldOnBlock(Player player, TalismanMechanic mechanic) {
         if (player.isBlocking()) {
             int absorption = mechanic.getInt("absorption_hearts", 2);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, absorption - 1, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, absorption - 1, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -545,8 +545,8 @@ public class MechanicEngine {
             }
 
             int duration = mechanic.getInt("duration", 60);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 4, true, false, true));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 2, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 4, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 2, effect.ambient(), effect.particles(), effect.icon()));
             player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation(), 30);
 
             long cooldown = mechanic.getLong("cooldown", 120000);
@@ -567,7 +567,7 @@ public class MechanicEngine {
 
         List<TalismanMechanic.PotionEffectConfig> effects = mechanic.getPotionEffectList("effects");
         for (TalismanMechanic.PotionEffectConfig effect : effects) {
-            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), true, false, true));
+            player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
 
         Location loc = player.getLocation();
@@ -597,8 +597,8 @@ public class MechanicEngine {
         double healthMultiplier = mechanic.getDouble("health_multiplier", 0.50);
         player.setHealth(player.getMaxHealth() * healthMultiplier);
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 4, true, false, true));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 3, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 4, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 3, effect.ambient(), effect.particles(), effect.icon()));
 
         Location loc = player.getLocation();
         player.getWorld().spawnParticle(Particle.END_ROD, loc.add(0, 1, 0), 100, 1, 2, 1, 0.1);
@@ -617,7 +617,7 @@ public class MechanicEngine {
         long time = player.getWorld().getTime();
         if (time >= 13000 && time <= 23000) { // Night time
             int strength = mechanic.getInt("strength_amplifier", 1);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
@@ -626,13 +626,13 @@ public class MechanicEngine {
         if (time < 13000 || time > 23000) { // Day time
             int resistance = mechanic.getInt("resistance_amplifier", 0);
             int regen = mechanic.getInt("regen_amplifier", 0);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, resistance, true, false, true));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, regen, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, resistance, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, regen, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
     private void applyElementalImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100, 0, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applySpiritWalk(Player player, TalismanMechanic mechanic) {
@@ -653,23 +653,23 @@ public class MechanicEngine {
     }
 
     private void applyKnockbackImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 0, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applyFallDamageImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 40, 0, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 40, 0, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applyExplosionImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applyMagicBarrier(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, effect.ambient(), effect.particles(), effect.icon()));
     }
 
     private void applyAngelWings(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 10, 0, true, false, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 10, 0, effect.ambient(), effect.particles(), effect.icon()));
         player.setAllowFlight(true);
     }
 
@@ -678,7 +678,7 @@ public class MechanicEngine {
         if (player.getHealth() > damage) {
             player.damage(damage);
             int strength = mechanic.getInt("strength_amplifier", 2);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, true, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, effect.ambient(), effect.particles(), effect.icon()));
         }
     }
 
