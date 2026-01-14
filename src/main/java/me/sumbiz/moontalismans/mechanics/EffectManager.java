@@ -617,7 +617,28 @@ public class EffectManager implements Listener {
         if (meta == null) return null;
 
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        return pdc.get(keyId, PersistentDataType.STRING);
+        String storedId = pdc.get(keyId, PersistentDataType.STRING);
+        if (storedId != null) {
+            return storedId;
+        }
+
+        if (!meta.hasCustomModelData()) {
+            return null;
+        }
+
+        int modelData = meta.getCustomModelData();
+        Material material = item.getType();
+
+        for (TalismanItem talisman : plugin.getItemManager().getItems().values()) {
+            Integer talismanModelData = talisman.getCustomModelData();
+            if (talismanModelData != null
+                && talismanModelData == modelData
+                && talisman.getMaterial() == material) {
+                return talisman.getId();
+            }
+        }
+
+        return null;
     }
 
     private boolean isOnCooldown(Player player, String ability) {

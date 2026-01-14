@@ -446,26 +446,6 @@ items:
           ambient: true
           particles: false
           icon: false
-      revive:
-        type: REVIVE_ON_DEATH
-        enabled: true
-        health_multiplier: 0.30
-        cooldown: 300000
-        effects:
-          - type: REGENERATION
-            duration: 100
-            amplifier: 2
-          - type: FIRE_RESISTANCE
-            duration: 200
-            amplifier: 0
-      low_health_regen:
-        type: LOW_HEALTH_REGEN
-        enabled: true
-        health_threshold: 0.3
-        effect:
-          type: REGENERATION
-          duration: 60
-          amplifier: 1
 
   talisman_ekhidny:
     enabled: true
@@ -919,7 +899,7 @@ items:
         damage: 5.0
 
 effects:
-  passive_effects_enabled: false
+  passive_effects_enabled: true
   particles_enabled: false
   effect_refresh_interval: 40
   particle_interval: 10
