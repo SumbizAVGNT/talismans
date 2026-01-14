@@ -440,6 +440,7 @@ items:
         type: FIRE_RESISTANCE
         enabled: true
         effect:
+          type: FIRE_RESISTANCE
           duration: 40
           amplifier: 0
           ambient: true

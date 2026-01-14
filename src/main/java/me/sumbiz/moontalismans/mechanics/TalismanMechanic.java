@@ -142,7 +142,8 @@ public class TalismanMechanic {
     /**
      * Конфигурация эффекта зелья для механики.
      */
-    public record PotionEffectConfig(PotionEffectType type, int duration, int amplifier) {
+    public record PotionEffectConfig(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles,
+                                     boolean icon) {
         public static PotionEffectConfig fromMap(Map<?, ?> map) {
             Object typeObj = map.get("type");
             if (!(typeObj instanceof String typeStr)) {
@@ -156,11 +157,17 @@ public class TalismanMechanic {
 
             Object durationObj = map.containsKey("duration") ? map.get("duration") : 60;
             Object amplifierObj = map.containsKey("amplifier") ? map.get("amplifier") : 0;
+            Object ambientObj = map.containsKey("ambient") ? map.get("ambient") : true;
+            Object particlesObj = map.containsKey("particles") ? map.get("particles") : false;
+            Object iconObj = map.containsKey("icon") ? map.get("icon") : true;
 
             int duration = durationObj instanceof Number number ? number.intValue() : 60;
             int amplifier = amplifierObj instanceof Number number ? number.intValue() : 0;
+            boolean ambient = ambientObj instanceof Boolean value ? value : true;
+            boolean particles = particlesObj instanceof Boolean value ? value : false;
+            boolean icon = iconObj instanceof Boolean value ? value : true;
 
-            return new PotionEffectConfig(type, duration, amplifier);
+            return new PotionEffectConfig(type, duration, amplifier, ambient, particles, icon);
         }
     }
 
