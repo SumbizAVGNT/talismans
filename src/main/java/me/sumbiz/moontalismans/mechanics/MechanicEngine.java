@@ -195,7 +195,7 @@ public class MechanicEngine {
                 player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
             }
             // Dolphins Grace
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.DOLPHINS_GRACE, 100, 0));
         }
     }
 
@@ -234,13 +234,13 @@ public class MechanicEngine {
 
     private void applyEnhancedJump(Player player, TalismanMechanic mechanic) {
         int amplifier = mechanic.getInt("amplifier", 1);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, amplifier, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.JUMP_BOOST, 100, amplifier));
     }
 
     private void applyInvisibilityOnSneak(Player player, TalismanMechanic mechanic) {
         if (player.isSneaking()) {
             int duration = mechanic.getInt("duration", 100);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, duration, 0, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.INVISIBILITY, duration, 0));
         }
     }
 
@@ -523,7 +523,7 @@ public class MechanicEngine {
     private void handleShieldOnBlock(Player player, TalismanMechanic mechanic) {
         if (player.isBlocking()) {
             int absorption = mechanic.getInt("absorption_hearts", 2);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 100, absorption - 1, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.ABSORPTION, 100, absorption - 1));
         }
     }
 
@@ -545,8 +545,8 @@ public class MechanicEngine {
             }
 
             int duration = mechanic.getInt("duration", 60);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, duration, 4, effect.ambient(), effect.particles(), effect.icon()));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, duration, 2, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, duration, 4));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.REGENERATION, duration, 2));
             player.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation(), 30);
 
             long cooldown = mechanic.getLong("cooldown", 120000);
@@ -597,8 +597,8 @@ public class MechanicEngine {
         double healthMultiplier = mechanic.getDouble("health_multiplier", 0.50);
         player.setHealth(player.getMaxHealth() * healthMultiplier);
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 4, effect.ambient(), effect.particles(), effect.icon()));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 3, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, 4));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.REGENERATION, 200, 3));
 
         Location loc = player.getLocation();
         player.getWorld().spawnParticle(Particle.END_ROD, loc.add(0, 1, 0), 100, 1, 2, 1, 0.1);
@@ -617,7 +617,7 @@ public class MechanicEngine {
         long time = player.getWorld().getTime();
         if (time >= 13000 && time <= 23000) { // Night time
             int strength = mechanic.getInt("strength_amplifier", 1);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.STRENGTH, 100, strength));
         }
     }
 
@@ -626,13 +626,13 @@ public class MechanicEngine {
         if (time < 13000 || time > 23000) { // Day time
             int resistance = mechanic.getInt("resistance_amplifier", 0);
             int regen = mechanic.getInt("regen_amplifier", 0);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, resistance, effect.ambient(), effect.particles(), effect.icon()));
-            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, regen, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, resistance));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.REGENERATION, 100, regen));
         }
     }
 
     private void applyElementalImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.FIRE_RESISTANCE, 100, 0));
     }
 
     private void applySpiritWalk(Player player, TalismanMechanic mechanic) {
@@ -653,23 +653,23 @@ public class MechanicEngine {
     }
 
     private void applyKnockbackImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 0, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, 0));
     }
 
     private void applyFallDamageImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 40, 0, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.SLOW_FALLING, 40, 0));
     }
 
     private void applyExplosionImmunity(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 2, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, 2));
     }
 
     private void applyMagicBarrier(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, 1));
     }
 
     private void applyAngelWings(Player player, TalismanMechanic mechanic) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 10, 0, effect.ambient(), effect.particles(), effect.icon()));
+        player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.LEVITATION, 10, 0));
         player.setAllowFlight(true);
     }
 
@@ -678,8 +678,16 @@ public class MechanicEngine {
         if (player.getHealth() > damage) {
             player.damage(damage);
             int strength = mechanic.getInt("strength_amplifier", 2);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 100, strength, effect.ambient(), effect.particles(), effect.icon()));
+            player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.STRENGTH, 100, strength));
         }
+    }
+
+    private PotionEffect createPotionEffect(TalismanMechanic mechanic, PotionEffectType type, int duration, int amplifier) {
+        TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
+        boolean ambient = effect != null ? effect.ambient() : true;
+        boolean particles = effect != null ? effect.particles() : false;
+        boolean icon = effect != null ? effect.icon() : true;
+        return new PotionEffect(type, duration, amplifier, ambient, particles, icon);
     }
 
     // ========== НОВЫЕ АТАКУЮЩИЕ МЕХАНИКИ ==========
