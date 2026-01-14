@@ -517,6 +517,66 @@ items:
         radius: 4.0
         percent: 0.10
 
+  bedrock_heart:
+    enabled: true
+    display_name: "&#3B3B3BΞ &fБедроковое сердце"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&#FF6A00Иммунитет к огню и лаве"
+      - "&9+4 Макс. здоровье"
+      - "&9+3 Броня"
+      - "&9+10% Сопротивление отбрасыванию"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Поглощение I"
+      - "&5➤ Регенерация при низком здоровье"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PAPER
+      generate: false
+      model_path: item/bedrock_heart
+      custom_model_data: 1056
+    attribute_modifiers:
+      offhand:
+        maxHealth: 4
+        armor: 3
+        knockbackResistance: 0.10
+    mechanics:
+      fire_resistance:
+        type: FIRE_RESISTANCE
+        enabled: true
+        effect:
+          type: FIRE_RESISTANCE
+          duration: 100
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      absorption:
+        type: ABSORPTION
+        enabled: true
+        effect:
+          type: ABSORPTION
+          duration: 200
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.4
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+
   iaso:
     enabled: true
     display_name: "&#f0f034Ξ &fСфера Иасо"
