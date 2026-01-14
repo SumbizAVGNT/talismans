@@ -425,16 +425,26 @@ items:
       - ""
       - "&7Когда во второстепенной руке:"
       - "&#FF6A00Иммунитет к огню и лаве"
+      - "&9+4 Броня"
+      - "&9+2 Твёрдость брони"
+      - "&9+5% Сопротивление отбрасыванию"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Поглощение I"
+      - "&5➤ Регенерация при низком здоровье"
     glint: false
     item_flags:
       - HIDE_ATTRIBUTES
     resource:
-      material: TOTEM_OF_UNDYING
+      material: PAPER
       generate: false
       model_path: item/kill_fx_token
       custom_model_data: 1055
     attribute_modifiers:
-      offhand: {}
+      offhand:
+        armor: 4
+        armorToughness: 2
+        knockbackResistance: 0.05
     mechanics:
       fire_resistance:
         type: FIRE_RESISTANCE
@@ -442,6 +452,27 @@ items:
         effect:
           type: FIRE_RESISTANCE
           duration: 40
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      absorption:
+        type: ABSORPTION
+        enabled: true
+        effect:
+          type: ABSORPTION
+          duration: 200
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.4
+        effect:
+          type: REGENERATION
+          duration: 60
           amplifier: 0
           ambient: true
           particles: false
