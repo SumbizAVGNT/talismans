@@ -425,33 +425,33 @@ items:
       - ""
       - "&7Когда во второстепенной руке:"
       - "&#FF6A00Иммунитет к огню и лаве"
-      - "&9+4 Броня"
-      - "&9+2 Твёрдость брони"
-      - "&9+5% Сопротивление отбрасыванию"
+      - "&9+4 Макс. здоровье"
+      - "&9+3 Броня"
+      - "&9+10% Сопротивление отбрасыванию"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Поглощение I"
       - "&5➤ Регенерация при низком здоровье"
-    glint: false
+    glint: true
     item_flags:
       - HIDE_ATTRIBUTES
     resource:
       material: PAPER
       generate: false
-      model_path: item/kill_fx_token
-      custom_model_data: 1055
+      model_path: item/bedrock_heart
+      custom_model_data: 1056
     attribute_modifiers:
       offhand:
-        armor: 4
-        armorToughness: 2
-        knockbackResistance: 0.05
+        maxHealth: 4
+        armor: 3
+        knockbackResistance: 0.10
     mechanics:
       fire_resistance:
         type: FIRE_RESISTANCE
         enabled: true
         effect:
           type: FIRE_RESISTANCE
-          duration: 40
+          duration: 100
           amplifier: 0
           ambient: true
           particles: false
@@ -990,7 +990,7 @@ items:
         damage: 5.0
 
 effects:
-  passive_effects_enabled: true
+  passive_effects_enabled: false
   particles_enabled: false
   effect_refresh_interval: 40
   particle_interval: 10
