@@ -399,7 +399,7 @@ public class EffectManager implements Listener {
     }
 
     private Set<PotionEffectType> collectPassivePotionEffects(TalismanItem item) {
-        Set<PotionEffectType> effects = EnumSet.noneOf(PotionEffectType.class);
+        Set<PotionEffectType> effects = new HashSet<>();
         for (TalismanItem.ConfiguredPotionEffect effect : item.getPassivePotionEffects()) {
             effects.add(effect.type());
         }
