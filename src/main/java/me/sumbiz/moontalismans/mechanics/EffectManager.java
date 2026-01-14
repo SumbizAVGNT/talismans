@@ -104,6 +104,8 @@ public class EffectManager implements Listener {
 
     // Active effects per player
     private final Map<UUID, Set<String>> activeEffects = new ConcurrentHashMap<>();
+    private final Map<UUID, String> lastPassiveItemId = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<PotionEffectType>> lastPassivePotionEffects = new ConcurrentHashMap<>();
 
     // Particle task
     private BukkitRunnable particleTask;
@@ -269,15 +271,35 @@ public class EffectManager implements Listener {
         String itemId = getItemId(offhand);
 
         if (itemId == null) {
-            // Clear effects from this player
+            clearPassiveEffects(player);
             activeEffects.remove(player.getUniqueId());
+            lastPassiveItemId.remove(player.getUniqueId());
+            lastPassivePotionEffects.remove(player.getUniqueId());
             return;
         }
 
+        String previousItemId = lastPassiveItemId.get(player.getUniqueId());
+        if (previousItemId != null && !previousItemId.equals(itemId)) {
+            clearPassiveEffects(player);
+            lastPassivePotionEffects.remove(player.getUniqueId());
+        }
+
         Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
+        if (itemOpt.isEmpty()) {
+            clearPassiveEffects(player);
+            activeEffects.remove(player.getUniqueId());
+            lastPassiveItemId.remove(player.getUniqueId());
+            lastPassivePotionEffects.remove(player.getUniqueId());
+            return;
+        }
 
         TalismanItem item = itemOpt.get();
+        lastPassiveItemId.put(player.getUniqueId(), itemId);
+        lastPassivePotionEffects.put(player.getUniqueId(), collectPassivePotionEffects(item));
+
+        if (!passiveEffectsEnabled) {
+            return;
+        }
 
         // Apply built-in passive effects based on item ID patterns
         applyBuiltInPassiveEffects(player, item);
@@ -364,6 +386,85 @@ public class EffectManager implements Listener {
         for (TalismanItem.ConfiguredPotionEffect effect : item.getPassivePotionEffects()) {
             player.addPotionEffect(effect.toPotionEffect());
         }
+    }
+
+    private void clearPassiveEffects(Player player) {
+        Set<PotionEffectType> previous = lastPassivePotionEffects.get(player.getUniqueId());
+        if (previous == null || previous.isEmpty()) {
+            return;
+        }
+        for (PotionEffectType type : previous) {
+            player.removePotionEffect(type);
+        }
+    }
+
+    private Set<PotionEffectType> collectPassivePotionEffects(TalismanItem item) {
+        Set<PotionEffectType> effects = EnumSet.noneOf(PotionEffectType.class);
+        for (TalismanItem.ConfiguredPotionEffect effect : item.getPassivePotionEffects()) {
+            effects.add(effect.type());
+        }
+
+        for (TalismanMechanic mechanic : item.getMechanics()) {
+            if (!mechanic.isEnabled() || !mechanic.getType().isPassive()) {
+                continue;
+            }
+            TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
+            if (effect != null) {
+                effects.add(effect.type());
+            }
+            switch (mechanic.getType()) {
+                case WATER_BREATHING -> effects.add(PotionEffectType.DOLPHINS_GRACE);
+                case ENHANCED_JUMP -> effects.add(PotionEffectType.JUMP_BOOST);
+                case INVISIBILITY_ON_SNEAK -> effects.add(PotionEffectType.INVISIBILITY);
+                case ELEMENTAL_IMMUNITY -> effects.add(PotionEffectType.FIRE_RESISTANCE);
+                case KNOCKBACK_IMMUNITY, MAGIC_BARRIER, EXPLOSION_IMMUNITY -> effects.add(PotionEffectType.RESISTANCE);
+                case FALL_DAMAGE_IMMUNITY -> effects.add(PotionEffectType.SLOW_FALLING);
+                case ANGEL_WINGS -> effects.add(PotionEffectType.LEVITATION);
+                case DARK_PACT -> effects.add(PotionEffectType.STRENGTH);
+                case BLOOD_MOON -> effects.add(PotionEffectType.STRENGTH);
+                case SOLAR_FLARE -> {
+                    effects.add(PotionEffectType.RESISTANCE);
+                    effects.add(PotionEffectType.REGENERATION);
+                }
+                default -> {
+                }
+            }
+        }
+
+        if (!passiveEffectsEnabled) {
+            return effects;
+        }
+
+        String id = item.getId().toLowerCase();
+        if (phoenixEnabled && (id.contains("feniksa") || id.contains("phoenix"))) {
+            effects.add(PotionEffectType.REGENERATION);
+        }
+        if (healerEnabled && (id.contains("lekarya") || id.contains("healer"))) {
+            effects.add(PotionEffectType.REGENERATION);
+        }
+        if (tritonEnabled && (id.contains("tritona") || id.contains("triton"))) {
+            effects.add(PotionEffectType.WATER_BREATHING);
+            effects.add(PotionEffectType.DOLPHINS_GRACE);
+        }
+        if (graniEnabled && id.contains("grani")) {
+            effects.add(PotionEffectType.SPEED);
+        }
+        if (aegisEnabled && (id.contains("egida") || id.contains("aegis"))) {
+            effects.add(PotionEffectType.RESISTANCE);
+        }
+        if (magmaEnabled && id.contains("magma")) {
+            effects.add(PotionEffectType.FIRE_RESISTANCE);
+        }
+        if (athenaEnabled && (id.contains("afina") || id.contains("athena"))) {
+            effects.add(PotionEffectType.STRENGTH);
+        }
+        if (theurgyEnabled && (id.contains("teurgia") || id.contains("theurgy"))) {
+            effects.add(PotionEffectType.ABSORPTION);
+        }
+        if (iasoEnabled && id.contains("iaso")) {
+            effects.add(PotionEffectType.SATURATION);
+        }
+        return effects;
     }
 
     /**
@@ -674,6 +775,8 @@ public class EffectManager implements Listener {
         mechanicEngine.cleanup();
         cooldowns.clear();
         activeEffects.clear();
+        lastPassiveItemId.clear();
+        lastPassivePotionEffects.clear();
     }
 
     private record PotionSetting(int durationTicks, int amplifier) {}

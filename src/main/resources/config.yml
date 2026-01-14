@@ -990,7 +990,7 @@ items:
         damage: 5.0
 
 effects:
-  passive_effects_enabled: false
+  passive_effects_enabled: true
   particles_enabled: false
   effect_refresh_interval: 40
   particle_interval: 10
