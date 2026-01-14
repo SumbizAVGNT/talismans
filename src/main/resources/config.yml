@@ -418,6 +418,54 @@ items:
           duration: 60
           amplifier: 1
 
+  bedrock_heart:
+    enabled: true
+    display_name: "&#3B3B3BΞ &fБедроковое сердце"
+    lore:
+      - ""
+      - "&7Когда во второстепенной руке:"
+      - "&#FF6A00Иммунитет к огню и лаве"
+    glint: false
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: TOTEM_OF_UNDYING
+      generate: false
+      model_path: item/kill_fx_token
+      custom_model_data: 1055
+    attribute_modifiers:
+      offhand: {}
+    mechanics:
+      fire_resistance:
+        type: FIRE_RESISTANCE
+        enabled: true
+        effect:
+          duration: 40
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      revive:
+        type: REVIVE_ON_DEATH
+        enabled: true
+        health_multiplier: 0.30
+        cooldown: 300000
+        effects:
+          - type: REGENERATION
+            duration: 100
+            amplifier: 2
+          - type: FIRE_RESISTANCE
+            duration: 200
+            amplifier: 0
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.3
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 1
+
   talisman_ekhidny:
     enabled: true
     display_name: "&#f0f034Ξ &fТалисман Ехидны"

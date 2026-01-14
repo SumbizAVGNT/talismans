@@ -30,10 +30,10 @@ public class AdminBrowserMenu implements InventoryHolder {
     public AdminBrowserMenu(MoonTalismansPlugin plugin, int page) {
         this.plugin = plugin;
         this.page = Math.max(page, 0);
-        // Sort items: talismans first, then spheres, alphabetically within each group
+        // Sort items: talismans first, then spheres, then paper, alphabetically within each group
         this.entries = plugin.getItemManager().getItems().values().stream()
                 .sorted(Comparator
-                        .comparing(TalismanItem::isSphere)
+                        .comparing((TalismanItem item) -> item.getItemType().ordinal())
                         .thenComparing(TalismanItem::getId))
                 .collect(Collectors.toList());
     }
@@ -125,12 +125,17 @@ public class AdminBrowserMenu implements InventoryHolder {
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("Всего предметов: ").color(NamedTextColor.GRAY)
                     .append(Component.text(String.valueOf(entries.size())).color(NamedTextColor.WHITE)));
-            long talismans = entries.stream().filter(i -> !i.isSphere()).count();
+            long talismans = entries.stream()
+                    .filter(itemEntry -> itemEntry.getItemType() == TalismanItem.ItemType.TALISMAN)
+                    .count();
             long spheres = entries.stream().filter(TalismanItem::isSphere).count();
+            long papers = entries.stream().filter(TalismanItem::isPaper).count();
             lore.add(Component.text("Талисманов: ").color(NamedTextColor.GRAY)
                     .append(Component.text(String.valueOf(talismans)).color(NamedTextColor.YELLOW)));
             lore.add(Component.text("Сфер: ").color(NamedTextColor.GRAY)
                     .append(Component.text(String.valueOf(spheres)).color(NamedTextColor.AQUA)));
+            lore.add(Component.text("Бумаги: ").color(NamedTextColor.GRAY)
+                    .append(Component.text(String.valueOf(papers)).color(NamedTextColor.WHITE)));
             meta.lore(lore);
             item.setItemMeta(meta);
         }
