@@ -72,6 +72,9 @@ public class TalismanMechanic {
 
     public PotionEffectConfig getPotionEffect(String key) {
         Object value = parameters.get(key);
+        if (value instanceof ConfigurationSection section) {
+            return PotionEffectConfig.fromMap(section.getValues(false));
+        }
         if (value instanceof Map<?, ?> map) {
             return PotionEffectConfig.fromMap(map);
         }
