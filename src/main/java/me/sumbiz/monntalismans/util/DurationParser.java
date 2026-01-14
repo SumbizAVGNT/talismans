@@ -9,6 +9,9 @@ public final class DurationParser {
         String raw = s.trim().toLowerCase();
 
         try {
+            if (raw.equals("infinity") || raw.equals("infinite") || raw.equals("inf") || raw.equals("unlimited")) {
+                return Long.MAX_VALUE;
+            }
             if (raw.endsWith("ms")) return Long.parseLong(raw.substring(0, raw.length() - 2));
             if (raw.endsWith("s")) return (long) (Double.parseDouble(raw.substring(0, raw.length() - 1)) * 1000L);
             if (raw.endsWith("m")) return (long) (Double.parseDouble(raw.substring(0, raw.length() - 1)) * 60_000L);

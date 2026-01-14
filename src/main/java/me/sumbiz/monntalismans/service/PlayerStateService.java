@@ -206,7 +206,7 @@ public final class PlayerStateService implements Listener {
                 if (applied >= maxPotions) break;
 
                 long durMs = Math.min(maxDur, Math.max(1000L, ps.durationMillis()));
-                int ticks = (int) Math.max(20, durMs / 50L);
+                int ticks = toPotionTicks(durMs);
 
                 target.addPotionEffect(new PotionEffect(ps.type(), ticks, ps.amplifier(), true, false, true));
                 applied++;
@@ -245,7 +245,7 @@ public final class PlayerStateService implements Listener {
         center.setY(Math.floor(center.getY()) + 0.5);
         center.setZ(Math.floor(center.getZ()) + 0.5);
 
-        domes.add(new ActiveDome(owner.getUniqueId(), center, radius, targets, now + duration, period, dome.potions(), now));
+        domes.add(new ActiveDome(owner.getUniqueId(), center, radius, targets, safeAddDuration(now, duration), period, dome.potions(), now));
     }
 
     // ---------------- events -> rescan
@@ -403,11 +403,11 @@ public final class PlayerStateService implements Listener {
         int newCharges = charges - 1;
 
         itemPdc.set(kCharges, PersistentDataType.INTEGER, newCharges);
-        itemPdc.set(kCooldownUntil, PersistentDataType.LONG, now + Math.max(0, s.cooldownMillis()));
+        itemPdc.set(kCooldownUntil, PersistentDataType.LONG, safeAddDuration(now, Math.max(0, s.cooldownMillis())));
         it.setItemMeta(meta);
 
         if (gcd > 0) {
-            p.getPersistentDataContainer().set(kGlobalCooldownUntil, PersistentDataType.LONG, now + gcd);
+            p.getPersistentDataContainer().set(kGlobalCooldownUntil, PersistentDataType.LONG, safeAddDuration(now, gcd));
         }
 
         if (newCharges <= 0) {
@@ -443,7 +443,7 @@ public final class PlayerStateService implements Listener {
             if (applied >= maxPotions) break;
 
             long durMs = Math.min(maxDur, Math.max(1000L, ps.durationMillis()));
-            int ticks = (int) Math.max(20, durMs / 50L);
+            int ticks = toPotionTicks(durMs);
 
             p.addPotionEffect(new PotionEffect(ps.type(), ticks, ps.amplifier(), true, false, true));
             applied++;
@@ -494,7 +494,7 @@ public final class PlayerStateService implements Listener {
                 if (applied >= maxPotions) break;
 
                 long durMs = Math.min(maxDur, Math.max(1000L, ps.durationMillis()));
-                int ticks = (int) Math.max(20, durMs / 50L);
+                int ticks = toPotionTicks(durMs);
 
                 other.addPotionEffect(new PotionEffect(ps.type(), ticks, ps.amplifier(), true, false, true));
                 applied++;
@@ -578,6 +578,17 @@ public final class PlayerStateService implements Listener {
 
             applyTalismans(p, true);
         }, 1L);
+    }
+
+    private static long safeAddDuration(long now, long duration) {
+        if (duration >= Long.MAX_VALUE - now) return Long.MAX_VALUE;
+        return now + duration;
+    }
+
+    private static int toPotionTicks(long durationMs) {
+        long ticks = durationMs / 50L;
+        if (ticks > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+        return (int) Math.max(20L, ticks);
     }
 
     private void applyTalismans(Player p, boolean alsoAttributes) {
