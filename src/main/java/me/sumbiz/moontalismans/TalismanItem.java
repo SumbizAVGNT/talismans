@@ -94,6 +94,10 @@ public class TalismanItem {
         return material;
     }
 
+    public Integer getCustomModelData() {
+        return customModelData;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
