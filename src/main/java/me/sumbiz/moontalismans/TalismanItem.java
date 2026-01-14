@@ -28,6 +28,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TalismanItem {
+    public enum ItemType {
+        TALISMAN,
+        SPHERE,
+        PAPER
+    }
+
     private final String id;
     private final boolean enabled;
     private final String displayName;
@@ -42,6 +48,7 @@ public class TalismanItem {
     private final List<ConfiguredPotionEffect> passivePotionEffects;
     private final Double damageReflect;
     private final List<TalismanMechanic> mechanics;
+    private final ItemType itemType;
 
     // Keys for PDC
     private static NamespacedKey KEY_ID;
@@ -67,6 +74,7 @@ public class TalismanItem {
         this.passivePotionEffects = passivePotionEffects != null ? passivePotionEffects : Collections.emptyList();
         this.damageReflect = damageReflect;
         this.mechanics = mechanics != null ? mechanics : Collections.emptyList();
+        this.itemType = resolveItemType(material, headTexture);
     }
 
     public static void initKeys(Plugin plugin) {
@@ -91,7 +99,25 @@ public class TalismanItem {
     }
 
     public boolean isSphere() {
-        return material == Material.PLAYER_HEAD || (headTexture != null && !headTexture.isEmpty());
+        return itemType == ItemType.SPHERE;
+    }
+
+    public boolean isPaper() {
+        return itemType == ItemType.PAPER;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    private ItemType resolveItemType(Material material, String headTexture) {
+        if (material == Material.PLAYER_HEAD || (headTexture != null && !headTexture.isEmpty())) {
+            return ItemType.SPHERE;
+        }
+        if (material == Material.PAPER) {
+            return ItemType.PAPER;
+        }
+        return ItemType.TALISMAN;
     }
 
     public Optional<ShapelessRecipe> buildRecipe(MoonTalismansPlugin plugin) {
@@ -147,7 +173,7 @@ public class TalismanItem {
             // Store item ID and type in PDC
             if (KEY_ID != null && KEY_TYPE != null) {
                 meta.getPersistentDataContainer().set(KEY_ID, PersistentDataType.STRING, id);
-                meta.getPersistentDataContainer().set(KEY_TYPE, PersistentDataType.STRING, isSphere() ? "SPHERE" : "TALISMAN");
+                meta.getPersistentDataContainer().set(KEY_TYPE, PersistentDataType.STRING, itemType.name());
             }
 
             stack.setItemMeta(meta);
