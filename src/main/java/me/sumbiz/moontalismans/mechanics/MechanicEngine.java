@@ -498,10 +498,25 @@ public class MechanicEngine {
 
     private void handleDarknessOnHit(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
         if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof Player attacker) {
+            double chance = mechanic.getDouble("chance", 0.15);
+            if (Math.random() >= chance) {
+                return;
+            }
+
+            String cooldownKey = "darkness_on_hit";
+            if (isOnCooldown(player, cooldownKey)) {
+                return;
+            }
+
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
                 attacker.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
                 spawnHitParticles(attacker.getLocation(), Particle.SONIC_BOOM);
+
+                long cooldown = mechanic.getLong("cooldown", 0L);
+                if (cooldown > 0) {
+                    setCooldown(player, cooldownKey, cooldown);
+                }
             }
         }
     }
