@@ -998,6 +998,7 @@ items:
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Тьма на атакующем при ударе"
+      - "&5  20% шанс, кд 5с, длительность 3с"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1010,9 +1011,11 @@ items:
       darkness_on_hit:
         type: DARKNESS_ON_HIT
         enabled: true
+        chance: 0.20
+        cooldown: 5000
         effect:
           type: DARKNESS
-          duration: 80
+          duration: 60
           amplifier: 0
           ambient: true
           particles: false
