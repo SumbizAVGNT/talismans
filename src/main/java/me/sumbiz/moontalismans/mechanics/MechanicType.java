@@ -96,6 +96,9 @@ public enum MechanicType {
     /** Шипы - урон атакующему при получении урона */
     THORNS_DAMAGE,
 
+    /** Тьма на атакующем при получении урона */
+    DARKNESS_ON_HIT,
+
     /** Шанс уклонения от атаки */
     DODGE_CHANCE,
 
@@ -348,7 +351,7 @@ public enum MechanicType {
     public boolean triggersOnDamage() {
         return switch (this) {
             case SPEED_ON_DAMAGE, DAMAGE_REDUCTION, RESISTANCE_ON_HIT,
-                 DAMAGE_REFLECT, THORNS_DAMAGE, DODGE_CHANCE, EMERGENCY_TELEPORT,
+                 DAMAGE_REFLECT, THORNS_DAMAGE, DARKNESS_ON_HIT, DODGE_CHANCE, EMERGENCY_TELEPORT,
                  SHIELD_ON_BLOCK, DAMAGE_REDIRECT, MANA_SHIELD, REFLECT_PROJECTILES,
                  TIME_SLOW, RUNE_SHIELD, ELEMENTAL_ABSORPTION, SPECTRAL_FORM,
                  FROST_NOVA, SHOCK_WAVE, COUNTER_ATTACK, PROJECTILE_DEFLECT -> true;

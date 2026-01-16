@@ -122,6 +122,7 @@ public class MechanicEngine {
                 case DAMAGE_REFLECT -> handleDamageReflect(player, event, mechanic);
                 case RESISTANCE_ON_HIT -> handleResistanceOnHit(player, mechanic);
                 case THORNS_DAMAGE -> handleThornsDamage(player, event, mechanic);
+                case DARKNESS_ON_HIT -> handleDarknessOnHit(player, event, mechanic);
                 case DODGE_CHANCE -> handleDodgeChance(event, mechanic);
                 case EMERGENCY_TELEPORT -> handleEmergencyTeleport(player, mechanic);
                 case SHIELD_ON_BLOCK -> handleShieldOnBlock(player, mechanic);
@@ -492,6 +493,16 @@ public class MechanicEngine {
             double damage = mechanic.getDouble("damage", 2.0);
             attacker.damage(damage, player);
             spawnHitParticles(attacker.getLocation(), Particle.CRIT);
+        }
+    }
+
+    private void handleDarknessOnHit(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
+        if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof Player attacker) {
+            TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
+            if (effect != null) {
+                attacker.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
+                spawnHitParticles(attacker.getLocation(), Particle.SONIC_BOOM);
+            }
         }
     }
 

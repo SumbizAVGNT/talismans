@@ -989,6 +989,35 @@ items:
         chance: 0.10
         damage: 5.0
 
+  anomaly:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Аномалия"
+    lore:
+      - ""
+      - "&7Когда во второстпеной руке:"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Тьма на атакующем при ударе"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZhYmVlZDQyNGIyNTJhODk0NWE2NDQyYjQ2MmQ1ZjMxNDcwMWE4MTZkYTJkMGE2OWNjZGZjZmQ3NDZlNTg4ZSJ9fX0"
+    mechanics:
+      darkness_on_hit:
+        type: DARKNESS_ON_HIT
+        enabled: true
+        effect:
+          type: DARKNESS
+          duration: 80
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: true
+
 effects:
   passive_effects_enabled: true
   particles_enabled: false
