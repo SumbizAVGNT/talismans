@@ -37,10 +37,9 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Макс. здоровье"
+      - "&9+2 Макс. здоровье"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ Иммунитет к яду"
       - "&5➤ Отравление при ударе"
     glint: true
     item_flags:
@@ -52,11 +51,8 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        maxHealth: 4
+        maxHealth: 2
     mechanics:
-      poison_immunity:
-        type: POISON_IMMUNITY
-        enabled: true
       poison_on_hit:
         type: POISON_ON_HIT
         enabled: true
@@ -72,7 +68,7 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+5 Броня"
+      - "&9+2 Броня"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Рунический щит (2-3 сердца, 30 сек.)"
@@ -86,7 +82,7 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        armor: 5
+        armor: 2
     mechanics:
       rune_shield:
         type: RUNE_SHIELD
@@ -101,10 +97,9 @@ items:
       - ""
       - "&7Когда во второстпеной руке:"
       - "&9+2 Броня"
-      - "&9+10% Скорость ходьбы"
+      - "&c-2 Макс. здоровье"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ Казнь цели при HP ниже 2"
       - "&5➤ Шанс оглушить цель"
     glint: true
     item_flags:
@@ -117,12 +112,8 @@ items:
     attribute_modifiers:
       offhand:
         armor: 2
-        movementSpeed: 0.010
+        maxHealth: -2
     mechanics:
-      execute:
-        type: EXECUTE
-        enabled: true
-        health_threshold: 0.10
       stun_on_hit:
         type: STUN_ON_HIT
         enabled: true
@@ -141,12 +132,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Макс. здоровье"
-      - "&c-5% Скорость ходьбы"
+      - "&9+4 Макс. здоровье"
+      - "&c-10% Скорость ходьбы"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Иммунитет к яду"
-      - "&5➤ Отравление при ударе"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -157,20 +147,12 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        maxHealth: 3
-        movementSpeed: -0.005
+        maxHealth: 4
+        movementSpeed: -0.010
     mechanics:
       poison_immunity:
         type: POISON_IMMUNITY
         enabled: true
-      poison_on_hit:
-        type: POISON_ON_HIT
-        enabled: true
-        chance: 0.30
-        effect:
-          type: POISON
-          duration: 60
-          amplifier: 0
 
   talisman_kobry:
     enabled: true
@@ -209,7 +191,7 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Макс. здоровье"
+      - "&9+2 Макс. здоровье"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Шанс уклониться от атаки"
@@ -224,7 +206,7 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        maxHealth: 4
+        maxHealth: 2
     mechanics:
       dodge_chance:
         type: DODGE_CHANCE
@@ -233,7 +215,7 @@ items:
       low_health_regen:
         type: LOW_HEALTH_REGEN
         enabled: true
-        health_threshold: 0.17
+        health_threshold: 0.20
         effect:
           type: REGENERATION
           duration: 60
@@ -245,8 +227,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+6 Макс. здоровье"
-      - "&c-4 Броня"
+      - "&9+4 Макс. здоровье"
+      - "&c-2 Броня"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Пассивная регенерация"
+      - "&5➤ Регенерация II при 4 HP"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -257,8 +243,24 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        maxHealth: 6
-        armor: -4
+        maxHealth: 4
+        armor: -2
+    mechanics:
+      passive_regen:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: REGENERATION
+          duration: 100
+          amplifier: 0
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.20
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 1
 
   talisman_dionisa:
     enabled: true
@@ -266,9 +268,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+2 Урон"
-      - "&9+15% Скорость атаки"
-      - "&9+10% Скорость ходьбы"
+      - "&c-3 Броня"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Постоянная невидимость"
+      - "&5➤ Пассивное восстановление голода"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -279,9 +283,28 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 2
-        attackSpeed: 0.015
-        movementSpeed: 0.010
+        armor: -3
+    mechanics:
+      passive_invisibility:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: INVISIBILITY
+          duration: 100
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
+      saturation:
+        type: SATURATION
+        enabled: true
+        effect:
+          type: SATURATION
+          duration: 100
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
 
   talisman_gefesta:
     enabled: true
@@ -289,10 +312,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Урон"
-      - "&9+2 Макс. здоровье"
-      - "&9+20% Скорость атаки"
-      - "&c-50% Скорость ходьбы"
+      - "&9+2 Броня"
+      - "&c-2 Макс. здоровье"
+      - "&c-10% Скорость атаки"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Пассивный ремонт брони"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -303,10 +328,13 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 3
-        maxHealth: 2
-        attackSpeed: 0.02
-        movementSpeed: -0.05
+        armor: 2
+        maxHealth: -2
+        attackSpeed: -0.010
+    mechanics:
+      repair_equipment:
+        type: REPAIR_EQUIPMENT
+        enabled: true
 
   talisman_khauberka:
     enabled: true
@@ -314,8 +342,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+5 Урон"
-      - "&c-15% Скорость ходьбы"
+      - "&9+2 Броня"
+      - "&9+2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Частичное отражение урона"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -326,8 +357,13 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 5
-        movementSpeed: -0.015
+        armor: 2
+        maxHealth: 2
+    mechanics:
+      damage_reflect:
+        type: DAMAGE_REFLECT
+        enabled: true
+        percent: 0.15
 
   talisman_krushitelya:
     enabled: true
@@ -335,10 +371,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Урон"
-      - "&9+4 Макс. здоровье"
       - "&9+2 Броня"
-      - "&9+2 Твёрдость брони"
+      - "&9+2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Замедление при ударах"
+      - "&5➤ Пробитие брони врага"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -349,10 +387,23 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 3
-        maxHealth: 4
         armor: 2
-        armorToughness: 2
+        maxHealth: 2
+    mechanics:
+      slowness_on_hit:
+        type: SLOWNESS_ON_HIT
+        enabled: true
+        chance: 0.20
+        effect:
+          type: SLOWNESS
+          duration: 60
+          amplifier: 0
+      armor_shred:
+        type: ARMOR_SHRED
+        enabled: true
+        chance: 0.25
+        duration: 100
+        amplifier: 0
 
   talisman_grani:
     enabled: true
@@ -360,9 +411,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+15 Скорость ходьбы"
-      - "&9+3 Урон"
-      - "&c-4 Макс. здоровье"
+      - "&9+2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Скорость II на 3-5 сек. (20%)"
+      - "&5➤ 15% шанс уклонения"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -373,9 +426,20 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        movementSpeed: 0.015
-        attackDamage: 3
-        maxHealth: -4
+        maxHealth: 2
+    mechanics:
+      speed_on_damage:
+        type: SPEED_ON_DAMAGE
+        enabled: true
+        chance: 0.20
+        effect:
+          type: SPEED
+          duration: 80
+          amplifier: 1
+      dodge_chance:
+        type: DODGE_CHANCE
+        enabled: true
+        chance: 0.15
 
   talisman_dedala:
     enabled: true
@@ -383,8 +447,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+5 Урон"
-      - "&c-4 Макс. здоровье"
+      - "&9+2 Броня"
+      - "&c-10% Скорость ходьбы"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Усиленный прыжок"
+      - "&5➤ Замедление при ударах"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -395,8 +463,21 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 5
-        maxHealth: -4
+        armor: 2
+        movementSpeed: -0.010
+    mechanics:
+      enhanced_jump:
+        type: ENHANCED_JUMP
+        enabled: true
+        amplifier: 1
+      slowness_on_hit:
+        type: SLOWNESS_ON_HIT
+        enabled: true
+        chance: 0.20
+        effect:
+          type: SLOWNESS
+          duration: 60
+          amplifier: 0
 
   talisman_tritona:
     enabled: true
@@ -404,9 +485,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Защиты"
       - "&9+2 Макс. здоровье"
-      - "&c-3 Твёрдость брони"
+      - "&9+10% Скорость ходьбы"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Грация дельфина под водой"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -417,9 +500,16 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        armor: 3
         maxHealth: 2
-        armorToughness: -3
+        movementSpeed: 0.010
+    mechanics:
+      water_breathing:
+        type: WATER_BREATHING
+        enabled: true
+        effect:
+          type: WATER_BREATHING
+          duration: 100
+          amplifier: 0
 
   talisman_garmonii:
     enabled: true
@@ -427,9 +517,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+2 Урон"
       - "&9+2 Макс. здоровье"
-      - "&9+2 Защиты"
+      - "&9+2 Броня"
+      - "&9+5% Скорость бега"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Снижение урона на 10%"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -440,9 +533,14 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 2
         maxHealth: 2
         armor: 2
+        movementSpeed: 0.005
+    mechanics:
+      damage_reduction:
+        type: DAMAGE_REDUCTION
+        enabled: true
+        multiplier: 0.90
 
   talisman_feniksa:
     enabled: true
@@ -450,12 +548,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+6 Макс. здоровье"
-      - "&9+10% Скорость атаки"
+      - "&9+2 Макс. здоровье"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Возрождение при смерти"
-      - "&5➤ Регенерация при низком HP"
+      - "&5➤ Регенерация при возрождении"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -466,8 +563,7 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        maxHealth: 6
-        attackSpeed: 0.010
+        maxHealth: 2
     mechanics:
       revive:
         type: REVIVE_ON_DEATH
@@ -481,14 +577,6 @@ items:
           - type: FIRE_RESISTANCE
             duration: 100
             amplifier: 0
-      low_health_regen:
-        type: LOW_HEALTH_REGEN
-        enabled: true
-        health_threshold: 0.3
-        effect:
-          type: REGENERATION
-          duration: 60
-          amplifier: 1
 
   bedrock_heart:
     enabled: true
@@ -556,14 +644,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+6 Урон"
-      - "&c-2 Защиты"
-      - "&c-2 Твёрдость брони"
-      - "&c-4 Макс. здоровье"
+      - "&c-2 Макс. здоровье"
+      - "&c-2 Броня"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ 15% вампиризм от урона"
-      - "&5➤ AOE вампиризм (4 блока)"
+      - "&5➤ Вампиризм"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -574,20 +659,13 @@ items:
       custom_model_data: 1010
     attribute_modifiers:
       offhand:
-        attackDamage: 6
+        maxHealth: -2
         armor: -2
-        armorToughness: -2
-        maxHealth: -4
     mechanics:
       lifesteal:
         type: LIFESTEAL
         enabled: true
         percent: 0.15
-      aoe_lifesteal:
-        type: AOE_LIFESTEAL
-        enabled: true
-        radius: 4.0
-        percent: 0.10
 
   bedrock_heart:
     enabled: true
@@ -655,8 +733,10 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+1 Твердость брони"
-      - "&9+1 Броня"
+      - "&9+2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Пассивная регенерация I"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -667,8 +747,15 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmFkYzRhMDI0NzE4ZDQwMWVlYWU5ZTk1YjNjOTI3NjdmOTE2ZjMyM2M5ZTgzNjQ5YWQxNWM5MjY1ZWU1MDkyZiJ9fX0="
     attribute_modifiers:
       offhand:
-        armorToughness: 1
-        armor: 1
+        maxHealth: 2
+    mechanics:
+      passive_regen:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: REGENERATION
+          duration: 100
+          amplifier: 0
 
   skifa:
     enabled: true
@@ -699,8 +786,10 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+2 Максимальное здоровье"
-      - "&9+1 Везение"
+      - "&9+2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Пассивное восстановление голода"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -712,7 +801,17 @@ items:
     attribute_modifiers:
       offhand:
         maxHealth: 2
-        luck: 1
+    mechanics:
+      saturation:
+        type: SATURATION
+        enabled: true
+        effect:
+          type: SATURATION
+          duration: 100
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
 
   filona:
     enabled: true
@@ -741,9 +840,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Урон"
-      - "&9+2 Максимальное здоровье"
+      - "&9+2 Макс. здоровье"
       - "&c-3 Броня"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Замедление врагов при ударах"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -754,9 +855,17 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTgwNTU3ZmU2M2YwNmI0YzcwZTJjNWViMmVmNmMwZDhkNWI1NWZkMDljYzVkZTNiY2I2NWY4MzJlMDVkNGMyZSJ9fX0="
     attribute_modifiers:
       offhand:
-        attackDamage: 3
         maxHealth: 2
         armor: -3
+    mechanics:
+      slowness_on_hit:
+        type: SLOWNESS_ON_HIT
+        enabled: true
+        chance: 0.20
+        effect:
+          type: SLOWNESS
+          duration: 60
+          amplifier: 0
 
   epion:
     enabled: true
@@ -764,8 +873,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Урон"
-      - "&c-2 Максимальное здоровье"
+      - "&9+15% Скорость атаки"
+      - "&c-2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Короткая регенерация при уроне"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -776,8 +888,16 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjgyMjAyODJmMmVlNTk5NTExYjRmYzc0NjExMWM5NzM2ZDdiNDkxZThiY2ZiNjQ4YThhMTU2MjkyODFlZTUifX19"
     attribute_modifiers:
       offhand:
-        attackDamage: 3
+        attackSpeed: 0.015
         maxHealth: -2
+    mechanics:
+      regen_on_damage:
+        type: RESISTANCE_ON_HIT
+        enabled: true
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 0
 
   afina:
     enabled: true
@@ -785,10 +905,13 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+15% Скорость ходьбы"
-      - "&9+15% Скорость атаки"
-      - "&9+3 Урон"
-      - "&c-2 Максимальное здоровье"
+      - "&9+10% Скорость передвижения"
+      - "&9+5% Скорость атаки"
+      - "&c-2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Иммунитет к замедлению"
+      - "&5➤ Иммунитет к слабости"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -799,10 +922,16 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNmOWVlZGEzYmEyM2ZlMTQyM2M0MDM2ZTdkZDBhNzQ0NjFkZmY5NmJhZGM1YjJmMmI5ZmFhN2NjMTZmMzgyZiJ9fX0="
     attribute_modifiers:
       offhand:
-        movementSpeed: 0.015
-        attackSpeed: 0.015
-        attackDamage: 3
+        movementSpeed: 0.010
+        attackSpeed: 0.005
         maxHealth: -2
+    mechanics:
+      slowness_immunity:
+        type: SLOWNESS_IMMUNITY
+        enabled: true
+      weakness_immunity:
+        type: WEAKNESS_IMMUNITY
+        enabled: true
 
   panakea:
     enabled: true
@@ -810,8 +939,10 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Урон"
-      - "&c-2 Максимальное здоровье"
+      - "&9+4 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Усиленная регенерация при низком HP"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -822,8 +953,16 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2RmZDViZjFmZjA1NDMxNDdjOWQ2NGU2ODc2MWRiNmU0YjcxMzJhYzY1OGYwYjhmNzk4MzFmYWQ5YzI4OWVjYSJ9fX0="
     attribute_modifiers:
       offhand:
-        attackDamage: 4
-        maxHealth: -2
+        maxHealth: 4
+    mechanics:
+      low_health_regen:
+        type: LOW_HEALTH_REGEN
+        enabled: true
+        health_threshold: 0.30
+        effect:
+          type: REGENERATION
+          duration: 60
+          amplifier: 1
 
   magma:
     enabled: true
@@ -831,9 +970,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+2 Броня"
-      - "&9+2 Твердость брони"
-      - "&c-15% Скорость ходьбы"
+      - "&9+3 Броня"
+      - "&c-10% Скорость ходьбы"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Иммунитет к огню и лаве"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -844,9 +985,19 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiNWNlMGQ0NGMzZTgxMzhkYzJlN2U1MmMyODk3YmI4NzhlMWRiYzIyMGQ3MDY4OWM3YjZiMThkMzE3NWUwZiJ9fX0="
     attribute_modifiers:
       offhand:
-        armor: 2
-        armorToughness: 2
-        movementSpeed: -0.015
+        armor: 3
+        movementSpeed: -0.010
+    mechanics:
+      fire_resistance:
+        type: FIRE_RESISTANCE
+        enabled: true
+        effect:
+          type: FIRE_RESISTANCE
+          duration: 100
+          amplifier: 0
+          ambient: true
+          particles: false
+          icon: false
 
   teurgia:
     enabled: true
@@ -854,9 +1005,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Урон"
-      - "&9+4 Максимальное здоровье"
+      - "&9+4 Макс. здоровье"
       - "&c-15% Скорость атаки"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Иммунитет к яду и иссушению"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -867,9 +1020,15 @@ items:
     head_texture_base64: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIwMWFlMWE4YTA0ZGY1MjY1NmY1ZTQ4MTNlMWZiY2Y5Nzg3N2RiYmZiYzQyNjhkMDQzMTZkNmY5Zjc1MyJ9fX0"
     attribute_modifiers:
       offhand:
-        attackDamage: 4
         maxHealth: 4
         attackSpeed: -0.015
+    mechanics:
+      poison_immunity:
+        type: POISON_IMMUNITY
+        enabled: true
+      wither_immunity:
+        type: WITHER_IMMUNITY
+        enabled: true
 
   andromeda:
     enabled: true
@@ -877,10 +1036,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+15% Скорость ходьбы"
-      - "&9+2 Защиты"
-      - "&9+3 Урона"
-      - "&c-4 Максимальное здоровье"
+      - "&9+10% Скорость передвижения"
+      - "&9+2 Броня"
+      - "&c-2 Макс. здоровье"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Снижение урона от снарядов"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -891,10 +1052,15 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDRmZmUzZjM1OGYyMDliYWQ4ZmZmNGRjNDgyNDVkOWJhZjBhMDMxYjNjMWVlNmI3NTg0NjBhMzM5YjE1MTllMiJ9fX0"
     attribute_modifiers:
       offhand:
-        movementSpeed: 0.015
+        movementSpeed: 0.010
         armor: 2
-        attackDamage: 3
-        maxHealth: -4
+        maxHealth: -2
+    mechanics:
+      projectile_deflect:
+        type: PROJECTILE_DEFLECT
+        enabled: true
+        chance: 1.0
+        damage_reduction: 0.85
 
   pandora:
     enabled: true
@@ -902,9 +1068,12 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+25% Урон"
-      - "&9+10% Скорость ходьбы"
-      - "&c-10% Защиты"
+      - "&9+10% Скорость передвижения"
+      - "&c-2 Броня"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Усиление всех эффектов на владельце"
+      - "&5➤ Включая положительные и отрицательные"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -915,7 +1084,6 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGU1MWU2NWViNDA1Mjc3MjM4MmM5ZTUwN2E1NGJkZWQ0M2UzOWY3NTViNWRkZjU1YjNmMzk0NDNjZWQ0NjdmNCJ9fX0"
     attribute_modifiers:
       offhand:
-        attackDamage: 5
         movementSpeed: 0.010
         armor: -2
 
@@ -926,8 +1094,8 @@ items:
       - ""
       - "&7Когда во второстпеной руке:"
       - "&9+3 Броня"
-      - "&9+3 Твёрдости брони"
-      - "&c-15% Скорость ходьбы"
+      - "&9+2 Твёрдости брони"
+      - "&c-20% Скорость ходьбы"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -939,8 +1107,8 @@ items:
     attribute_modifiers:
       offhand:
         armor: 3
-        armorToughness: 3
-        movementSpeed: -0.015
+        armorToughness: 2
+        movementSpeed: -0.020
 
   apollon:
     enabled: true
@@ -948,8 +1116,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Урон"
       - "&c-10% Скорость ходьбы"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Пассивная регенерация"
+      - "&5➤ Сопротивление урону I"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -960,8 +1131,22 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQxMTdiNjAxOGZlZjBkNTE1NjcyMTczZTNiMjZlNjYwZDY1MWU1ODc2YmE2ZDAzZTUzNDIyNzBjNDliZWM4MCJ9fX0"
     attribute_modifiers:
       offhand:
-        attackDamage: 4
         movementSpeed: -0.010
+    mechanics:
+      passive_regen:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: REGENERATION
+          duration: 100
+          amplifier: 0
+      passive_resistance:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: RESISTANCE
+          duration: 100
+          amplifier: 0
 
   astreya:
     enabled: true
@@ -969,9 +1154,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+4 Максимальное здоровье"
-      - "&9+3 Урон"
-      - "&c-15% Скорость атаки"
+      - "&9+4 Макс. здоровье"
+      - "&c-10% Скорость атаки"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Иммунитет к замедлению"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -983,8 +1170,11 @@ items:
     attribute_modifiers:
       offhand:
         maxHealth: 4
-        attackDamage: 3
-        attackSpeed: -0.015
+        attackSpeed: -0.010
+    mechanics:
+      slowness_immunity:
+        type: SLOWNESS_IMMUNITY
+        enabled: true
 
   osiris:
     enabled: true
@@ -992,13 +1182,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Защиты"
-      - "&9+15% Отдача"
-      - "&c-15% Защиты отдачи"
+      - "&9+2 Броня"
+      - "&9+1 Твёрдость брони"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ 15% отражение урона"
-      - "&5➤ Шипы (2 урона за атаку)"
+      - "&5➤ Частичное отражение урона (Шипы)"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1009,9 +1197,8 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDgxMzYzNWJkODZiMTcxYmJlMTQzYWQ3MWUwOTAyMjkyNjQ5Y2IzYWI4NDQwZWQwMGY4NWNhNmNhMzgyOTkzNiJ9fX0"
     attribute_modifiers:
       offhand:
-        armor: 3
+        armor: 2
         armorToughness: 1
-        knockbackResistance: -0.015
     mechanics:
       reflect:
         type: DAMAGE_REFLECT
@@ -1028,13 +1215,11 @@ items:
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+3 Урон"
       - "&9+15% Скорость атаки"
-      - "&c-2 Максимальное здоровье"
+      - "&c-2 Макс. здоровье"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ 35% случайный дебафф"
-      - "&5➤ 10% призыв молнии"
+      - "&5➤ Ослабление врагов при ударах"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1045,21 +1230,15 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZhYmVlZDQyNGIyNTJhODk0NWE2NDQyYjQ2MmQ1ZjMxNDcwMWE4MTZkYTJkMGE2OWNjZGZjZmQ3NDZlNTg4ZSJ9fX0"
     attribute_modifiers:
       offhand:
-        attackDamage: 3
         attackSpeed: 0.015
         maxHealth: -2
     mechanics:
-      random_debuff:
-        type: RANDOM_DEBUFF_ON_HIT
+      armor_shred:
+        type: ARMOR_SHRED
         enabled: true
-        chance: 0.35
-        duration: 60
+        chance: 0.25
+        duration: 100
         amplifier: 0
-      lightning:
-        type: LIGHTNING_STRIKE
-        enabled: true
-        chance: 0.10
-        damage: 5.0
 
   anomaly:
     enabled: true
