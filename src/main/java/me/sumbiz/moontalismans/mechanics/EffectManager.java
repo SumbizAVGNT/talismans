@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -603,6 +604,35 @@ public class EffectManager implements Listener {
 
         // Apply new mechanic system
         mechanicEngine.handleAttackMechanics(player, target, event, item);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityDeath(EntityDeathEvent event) {
+        LivingEntity entity = event.getEntity();
+        Player killer = entity.getKiller();
+        if (killer == null) return;
+
+        ItemStack offhand = killer.getInventory().getItemInOffHand();
+        String itemId = getItemId(offhand);
+        if (itemId == null) return;
+
+        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
+        if (itemOpt.isEmpty()) return;
+
+        TalismanItem item = itemOpt.get();
+        for (TalismanMechanic mechanic : item.getMechanics()) {
+            if (!mechanic.isEnabled() || mechanic.getType() != MechanicType.HEAL_ON_KILL) {
+                continue;
+            }
+
+            double heal = mechanic.getDouble("heal", 4.0);
+            if (heal <= 0) {
+                continue;
+            }
+
+            killer.setHealth(Math.min(killer.getHealth() + heal, killer.getMaxHealth()));
+            spawnHitParticles(killer.getLocation(), Particle.HEART);
+        }
     }
 
     private void applyRandomChimeraEffect(LivingEntity target) {
