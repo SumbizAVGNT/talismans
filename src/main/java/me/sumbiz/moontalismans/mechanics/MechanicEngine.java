@@ -10,6 +10,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -55,11 +57,14 @@ public class MechanicEngine {
                 case SPIRIT_WALK -> applySpiritWalk(player, mechanic);
                 case POISON_IMMUNITY -> applyPoisonImmunity(player, mechanic);
                 case WITHER_IMMUNITY -> applyWitherImmunity(player, mechanic);
+                case SLOWNESS_IMMUNITY -> applySlownessImmunity(player, mechanic);
+                case WEAKNESS_IMMUNITY -> applyWeaknessImmunity(player, mechanic);
                 case KNOCKBACK_IMMUNITY -> applyKnockbackImmunity(player, mechanic);
                 case FALL_DAMAGE_IMMUNITY -> applyFallDamageImmunity(player, mechanic);
                 case EXPLOSION_IMMUNITY -> applyExplosionImmunity(player, mechanic);
                 case MAGIC_BARRIER -> applyMagicBarrier(player, mechanic);
                 case ANGEL_WINGS -> applyAngelWings(player, mechanic);
+                case REPAIR_EQUIPMENT -> applyRepairEquipment(player, mechanic);
                 case DARK_PACT -> applyDarkPact(player, mechanic);
                 default -> {}
             }
@@ -461,6 +466,10 @@ public class MechanicEngine {
     // Механики при получении урона
 
     private void handleSpeedOnDamage(Player player, TalismanMechanic mechanic) {
+        double chance = mechanic.getDouble("chance", 1.0);
+        if (Math.random() >= chance) {
+            return;
+        }
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
         if (effect != null) {
             player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
@@ -678,6 +687,18 @@ public class MechanicEngine {
         }
     }
 
+    private void applySlownessImmunity(Player player, TalismanMechanic mechanic) {
+        if (player.hasPotionEffect(PotionEffectType.SLOWNESS)) {
+            player.removePotionEffect(PotionEffectType.SLOWNESS);
+        }
+    }
+
+    private void applyWeaknessImmunity(Player player, TalismanMechanic mechanic) {
+        if (player.hasPotionEffect(PotionEffectType.WEAKNESS)) {
+            player.removePotionEffect(PotionEffectType.WEAKNESS);
+        }
+    }
+
     private void applyKnockbackImmunity(Player player, TalismanMechanic mechanic) {
         player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.RESISTANCE, 100, 0));
     }
@@ -705,6 +726,28 @@ public class MechanicEngine {
             player.damage(damage);
             int strength = mechanic.getInt("strength_amplifier", 2);
             player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.STRENGTH, 100, strength));
+        }
+    }
+
+    private void applyRepairEquipment(Player player, TalismanMechanic mechanic) {
+        double chance = mechanic.getDouble("chance", 0.10);
+        int amount = mechanic.getInt("amount", 1);
+        for (ItemStack item : player.getInventory().getArmorContents()) {
+            if (item == null) {
+                continue;
+            }
+            if (!(item.getItemMeta() instanceof Damageable damageable)) {
+                continue;
+            }
+            if (damageable.getDamage() <= 0) {
+                continue;
+            }
+            if (Math.random() >= chance) {
+                continue;
+            }
+            int repaired = Math.max(0, damageable.getDamage() - amount);
+            damageable.setDamage(repaired);
+            item.setItemMeta(damageable);
         }
     }
 

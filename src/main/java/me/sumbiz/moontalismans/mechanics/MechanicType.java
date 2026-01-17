@@ -263,6 +263,12 @@ public enum MechanicType {
     /** Иммунитет к эффекту иссушения */
     WITHER_IMMUNITY,
 
+    /** Иммунитет к эффекту замедления */
+    SLOWNESS_IMMUNITY,
+
+    /** Иммунитет к эффекту слабости */
+    WEAKNESS_IMMUNITY,
+
     /** Иммунитет к отбрасыванию */
     KNOCKBACK_IMMUNITY,
 
@@ -323,7 +329,7 @@ public enum MechanicType {
                  ABSORPTION, SATURATION, LOW_HEALTH_STRENGTH, INVISIBILITY_ON_SNEAK,
                  ENHANCED_JUMP, POISON_AURA, EXPERIENCE_GAIN, ITEM_MAGNET,
                  REPAIR_EQUIPMENT, BLOOD_MOON, SOLAR_FLARE, ELEMENTAL_IMMUNITY,
-                 SPIRIT_WALK, POISON_IMMUNITY, WITHER_IMMUNITY,
+                 SPIRIT_WALK, POISON_IMMUNITY, WITHER_IMMUNITY, SLOWNESS_IMMUNITY, WEAKNESS_IMMUNITY,
                  KNOCKBACK_IMMUNITY, FALL_DAMAGE_IMMUNITY, EXPLOSION_IMMUNITY,
                  MAGIC_BARRIER, ANGEL_WINGS, DARK_PACT -> true;
             default -> false;
