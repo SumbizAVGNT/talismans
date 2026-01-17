@@ -164,7 +164,7 @@ items:
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Иммунитет к яду"
-      - "&5➤ Кража эффектов с шансом"
+      - "&5➤ Кража эффектов с шансом 5%"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -183,7 +183,7 @@ items:
       steal_effects:
         type: STEAL_EFFECTS
         enabled: true
-        chance: 0.15
+        chance: 0.05
 
   talisman_manesa:
     enabled: true
@@ -272,7 +272,7 @@ items:
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Постоянная невидимость"
-      - "&5➤ Пассивное восстановление голода"
+      - "&5➤ Периодическое восстановление голода"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -295,16 +295,11 @@ items:
           ambient: true
           particles: false
           icon: false
-      saturation:
-        type: SATURATION
+      periodic_feed:
+        type: PERIODIC_FEED
         enabled: true
-        effect:
-          type: SATURATION
-          duration: 100
-          amplifier: 0
-          ambient: true
-          particles: false
-          icon: false
+        cooldown: 20000
+        food: 1
 
   talisman_gefesta:
     enabled: true
@@ -621,7 +616,7 @@ items:
         enabled: true
         effect:
           type: ABSORPTION
-          duration: 200
+          duration: 400
           amplifier: 0
           ambient: true
           particles: false
@@ -710,7 +705,7 @@ items:
         enabled: true
         effect:
           type: ABSORPTION
-          duration: 200
+          duration: 400
           amplifier: 0
           ambient: true
           particles: false
@@ -1242,14 +1237,15 @@ items:
 
   anomaly:
     enabled: true
-    display_name: "&#f0f034Ξ &fСфера Аномалия"
+    display_name: "&#f0f034Ξ &fСфера Скалка"
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
+      - "&9+2 Броня"
+      - "&9+2 Урон"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ Тьма на атакующем при ударе"
-      - "&5  20% шанс, кд 5с, длительность 3с"
+      - "&5➤ Тьма на атакующем при получении урона"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1258,12 +1254,16 @@ items:
       generate: false
       model_path: "minecraft:item/player_head"
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZhYmVlZDQyNGIyNTJhODk0NWE2NDQyYjQ2MmQ1ZjMxNDcwMWE4MTZkYTJkMGE2OWNjZGZjZmQ3NDZlNTg4ZSJ9fX0"
+    attribute_modifiers:
+      offhand:
+        armor: 2
+        attackDamage: 2
     mechanics:
       darkness_on_hit:
         type: DARKNESS_ON_HIT
         enabled: true
-        chance: 0.20
-        cooldown: 5000
+        chance: 1.0
+        cooldown: 0
         effect:
           type: DARKNESS
           duration: 60
@@ -1271,6 +1271,35 @@ items:
           ambient: true
           particles: false
           icon: true
+
+  rage:
+    enabled: true
+    display_name: "&#f0f034Ξ &fСфера Ярости"
+    lore:
+      - ""
+      - "&7Когда во второстпеной руке:"
+      - "&c-2 Броня"
+      - "&9+10% Урон"
+      - ""
+      - "&d&l⚔ СПОСОБНОСТИ:"
+      - "&5➤ Лечение при убийстве"
+    glint: true
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: PLAYER_HEAD
+      generate: false
+      model_path: "minecraft:item/player_head"
+    head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZhYmVlZDQyNGIyNTJhODk0NWE2NDQyYjQ2MmQ1ZjMxNDcwMWE4MTZkYTJkMGE2OWNjZGZjZmQ3NDZlNTg4ZSJ9fX0"
+    attribute_modifiers:
+      offhand:
+        armor: -2
+        attackDamage: 0.1
+    mechanics:
+      heal_on_kill:
+        type: HEAL_ON_KILL
+        enabled: true
+        heal: 4.0
 
 effects:
   passive_effects_enabled: true

@@ -40,6 +40,9 @@ public enum MechanicType {
     /** Пассивное насыщение */
     SATURATION,
 
+    /** Периодическое восстановление голода */
+    PERIODIC_FEED,
+
     /** Шанс отравить цель при ударе */
     POISON_ON_HIT,
 
@@ -326,7 +329,7 @@ public enum MechanicType {
     public boolean isPassive() {
         return switch (this) {
             case PASSIVE_REGEN, LOW_HEALTH_REGEN, WATER_BREATHING, FIRE_RESISTANCE,
-                 ABSORPTION, SATURATION, LOW_HEALTH_STRENGTH, INVISIBILITY_ON_SNEAK,
+                 ABSORPTION, SATURATION, PERIODIC_FEED, LOW_HEALTH_STRENGTH, INVISIBILITY_ON_SNEAK,
                  ENHANCED_JUMP, POISON_AURA, EXPERIENCE_GAIN, ITEM_MAGNET,
                  REPAIR_EQUIPMENT, BLOOD_MOON, SOLAR_FLARE, ELEMENTAL_IMMUNITY,
                  SPIRIT_WALK, POISON_IMMUNITY, WITHER_IMMUNITY, SLOWNESS_IMMUNITY, WEAKNESS_IMMUNITY,

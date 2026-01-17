@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Новый движок механик - работает напрямую с конфигурацией механик в предметах.
@@ -45,6 +46,7 @@ public class MechanicEngine {
                 case FIRE_RESISTANCE -> applyFireResistance(player, mechanic);
                 case ABSORPTION -> applyAbsorption(player, mechanic);
                 case SATURATION -> applySaturation(player, mechanic);
+                case PERIODIC_FEED -> applyPeriodicFeed(player, mechanic);
                 case LOW_HEALTH_STRENGTH -> applyLowHealthStrength(player, mechanic);
                 case ENHANCED_JUMP -> applyEnhancedJump(player, mechanic);
                 case INVISIBILITY_ON_SNEAK -> applyInvisibilityOnSneak(player, mechanic);
@@ -226,6 +228,29 @@ public class MechanicEngine {
         if (effect != null) {
             player.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
         }
+    }
+
+    private void applyPeriodicFeed(Player player, TalismanMechanic mechanic) {
+        if (player.getFoodLevel() >= 20) {
+            return;
+        }
+
+        String cooldownKey = "periodic_feed_" + mechanic.hashCode();
+        if (isOnCooldown(player, cooldownKey)) {
+            return;
+        }
+
+        int food = mechanic.getInt("food", 1);
+        float saturation = (float) mechanic.getDouble("saturation", 0.0);
+        int newFood = Math.min(20, player.getFoodLevel() + food);
+        player.setFoodLevel(newFood);
+
+        if (saturation > 0) {
+            player.setSaturation(Math.min(player.getSaturation() + saturation, newFood));
+        }
+
+        long cooldown = mechanic.getLong("cooldown", 20000);
+        setCooldown(player, cooldownKey, cooldown);
     }
 
     private void applyLowHealthStrength(Player player, TalismanMechanic mechanic) {
@@ -447,8 +472,8 @@ public class MechanicEngine {
         double chance = mechanic.getDouble("chance", 0.15);
         if (Math.random() < chance) {
             Collection<PotionEffect> effects = target.getActivePotionEffects();
+            List<PotionEffect> stealable = new ArrayList<>();
             for (PotionEffect effect : effects) {
-                // Steal beneficial effects (positive potion effects)
                 PotionEffectType type = effect.getType();
                 if (type.equals(PotionEffectType.SPEED) || type.equals(PotionEffectType.STRENGTH) ||
                     type.equals(PotionEffectType.JUMP_BOOST) || type.equals(PotionEffectType.REGENERATION) ||
@@ -456,9 +481,14 @@ public class MechanicEngine {
                     type.equals(PotionEffectType.WATER_BREATHING) || type.equals(PotionEffectType.INVISIBILITY) ||
                     type.equals(PotionEffectType.NIGHT_VISION) || type.equals(PotionEffectType.HEALTH_BOOST) ||
                     type.equals(PotionEffectType.ABSORPTION) || type.equals(PotionEffectType.SATURATION)) {
-                    attacker.addPotionEffect(effect);
-                    target.removePotionEffect(effect.getType());
+                    stealable.add(effect);
                 }
+            }
+
+            if (!stealable.isEmpty()) {
+                PotionEffect chosen = stealable.get(ThreadLocalRandom.current().nextInt(stealable.size()));
+                attacker.addPotionEffect(chosen);
+                target.removePotionEffect(chosen.getType());
             }
         }
     }
