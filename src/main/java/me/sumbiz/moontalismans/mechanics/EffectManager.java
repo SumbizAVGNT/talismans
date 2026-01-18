@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -99,6 +100,8 @@ public class EffectManager implements Listener {
     private final double osirisReflect;
     private final double athenaHealthThreshold;
     private final double pandoraRadius;
+    private final double pandoraPotionDurationChance;
+    private final double pandoraPotionDurationMultiplier;
 
     // Cooldowns per player per item
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
@@ -107,6 +110,7 @@ public class EffectManager implements Listener {
     private final Map<UUID, Set<String>> activeEffects = new ConcurrentHashMap<>();
     private final Map<UUID, String> lastPassiveItemId = new ConcurrentHashMap<>();
     private final Map<UUID, Set<PotionEffectType>> lastPassivePotionEffects = new ConcurrentHashMap<>();
+    private final Set<UUID> pandoraPotionExtensionInProgress = new HashSet<>();
 
     // Particle task
     private BukkitRunnable particleTask;
@@ -192,6 +196,8 @@ public class EffectManager implements Listener {
             readLegacyDouble(effectsSection, "multipliers.osiris_reflect", 0.15));
         athenaHealthThreshold = readDouble(mechanicsSection, "athena.health_threshold", 0.5);
         pandoraRadius = readDouble(mechanicsSection, "pandora.radius", 3.0);
+        pandoraPotionDurationChance = readDouble(mechanicsSection, "pandora.potion_duration_chance", 0.5);
+        pandoraPotionDurationMultiplier = readDouble(mechanicsSection, "pandora.potion_duration_multiplier", 2.0);
 
         startPassiveEffectTask();
         startParticleTask();
@@ -633,6 +639,54 @@ public class EffectManager implements Listener {
             killer.setHealth(Math.min(killer.getHealth() + heal, killer.getMaxHealth()));
             spawnHitParticles(killer.getLocation(), Particle.HEART);
         }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEntityPotionEffect(EntityPotionEffectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (event.getNewEffect() == null) return;
+        if (event.getAction() != EntityPotionEffectEvent.Action.ADDED
+            && event.getAction() != EntityPotionEffectEvent.Action.CHANGED) {
+            return;
+        }
+
+        UUID playerId = player.getUniqueId();
+        if (pandoraPotionExtensionInProgress.remove(playerId)) return;
+
+        if (!pandoraEnabled) return;
+        if (pandoraPotionDurationChance <= 0 || pandoraPotionDurationMultiplier <= 1.0) return;
+
+        ItemStack offhand = player.getInventory().getItemInOffHand();
+        String itemId = getItemId(offhand);
+        if (itemId == null) return;
+
+        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
+        if (itemOpt.isEmpty()) return;
+
+        TalismanItem item = itemOpt.get();
+        String id = item.getId().toLowerCase(Locale.ROOT);
+        if (!id.contains("pandora")) return;
+
+        if (Math.random() >= pandoraPotionDurationChance) return;
+
+        PotionEffect newEffect = event.getNewEffect();
+        int duration = newEffect.getDuration();
+        if (duration <= 0) return;
+
+        long extendedDuration = Math.round(duration * pandoraPotionDurationMultiplier);
+        int cappedDuration = (int) Math.min(Integer.MAX_VALUE, extendedDuration);
+        if (cappedDuration == duration) return;
+
+        event.setCancelled(true);
+        pandoraPotionExtensionInProgress.add(playerId);
+        player.addPotionEffect(new PotionEffect(
+            newEffect.getType(),
+            cappedDuration,
+            newEffect.getAmplifier(),
+            newEffect.isAmbient(),
+            newEffect.hasParticles(),
+            newEffect.hasIcon()
+        ));
     }
 
     private void applyRandomChimeraEffect(LivingEntity target) {

@@ -1069,6 +1069,7 @@ items:
       - "&d&l⚔ СПОСОБНОСТИ:"
       - "&5➤ Усиление всех эффектов на владельце"
       - "&5➤ Включая положительные и отрицательные"
+      - "&5➤ 50% шанс удвоить длительность нового эффекта"
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1306,6 +1307,11 @@ effects:
   particles_enabled: false
   effect_refresh_interval: 40
   particle_interval: 10
+  mechanics:
+    pandora:
+      enabled: true
+      potion_duration_chance: 0.5
+      potion_duration_multiplier: 2.0
 
 limits:
   max_aoe_radius: 10
