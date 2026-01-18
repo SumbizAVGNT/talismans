@@ -653,9 +653,6 @@ public class EffectManager implements Listener {
         UUID playerId = player.getUniqueId();
         if (pandoraPotionExtensionInProgress.remove(playerId)) return;
 
-        if (!pandoraEnabled) return;
-        if (pandoraPotionDurationChance <= 0 || pandoraPotionDurationMultiplier <= 1.0) return;
-
         ItemStack offhand = player.getInventory().getItemInOffHand();
         String itemId = getItemId(offhand);
         if (itemId == null) return;
@@ -664,16 +661,16 @@ public class EffectManager implements Listener {
         if (itemOpt.isEmpty()) return;
 
         TalismanItem item = itemOpt.get();
-        String id = item.getId().toLowerCase(Locale.ROOT);
-        if (!id.contains("pandora")) return;
-
-        if (Math.random() >= pandoraPotionDurationChance) return;
+        PandoraPotionSettings settings = getPandoraPotionSettings(item);
+        if (settings == null || !settings.enabled()) return;
+        if (settings.chance() <= 0 || settings.multiplier() <= 1.0) return;
+        if (Math.random() >= settings.chance()) return;
 
         PotionEffect newEffect = event.getNewEffect();
         int duration = newEffect.getDuration();
         if (duration <= 0) return;
 
-        long extendedDuration = Math.round(duration * pandoraPotionDurationMultiplier);
+        long extendedDuration = Math.round(duration * settings.multiplier());
         int cappedDuration = (int) Math.min(Integer.MAX_VALUE, extendedDuration);
         if (cappedDuration == duration) return;
 
@@ -688,6 +685,24 @@ public class EffectManager implements Listener {
             newEffect.hasIcon()
         ));
     }
+
+    private PandoraPotionSettings getPandoraPotionSettings(TalismanItem item) {
+        for (TalismanMechanic mechanic : item.getMechanics()) {
+            if (mechanic.getType() == MechanicType.PANDORA_POTION_EXTENSION) {
+                double chance = mechanic.getDouble("chance", 0.5);
+                double multiplier = mechanic.getDouble("multiplier", 2.0);
+                return new PandoraPotionSettings(mechanic.isEnabled(), chance, multiplier);
+            }
+        }
+
+        String id = item.getId().toLowerCase(Locale.ROOT);
+        if (!pandoraEnabled || !id.contains("pandora")) {
+            return null;
+        }
+        return new PandoraPotionSettings(true, pandoraPotionDurationChance, pandoraPotionDurationMultiplier);
+    }
+
+    private record PandoraPotionSettings(boolean enabled, double chance, double multiplier) {}
 
     private void applyRandomChimeraEffect(LivingEntity target) {
         PotionEffectType[] effects = {

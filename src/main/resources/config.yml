@@ -1082,6 +1082,12 @@ items:
       offhand:
         movementSpeed: 0.010
         armor: -2
+    mechanics:
+      potion_extension:
+        type: PANDORA_POTION_EXTENSION
+        enabled: true
+        chance: 0.5
+        multiplier: 2.0
 
   titan:
     enabled: true
@@ -1310,8 +1316,6 @@ effects:
   mechanics:
     pandora:
       enabled: true
-      potion_duration_chance: 0.5
-      potion_duration_multiplier: 2.0
 
 limits:
   max_aoe_radius: 10
