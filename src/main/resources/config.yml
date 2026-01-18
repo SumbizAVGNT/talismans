@@ -400,6 +400,36 @@ items:
         duration: 100
         amplifier: 0
 
+  kriskas:
+    enabled: true
+    display_name: "&cПерчатка Крискаса"
+    lore:
+      - ""
+      - "&7Когда во второстпеной руке:"
+      - "&9Скорость разрушения блоков +20%"
+      - "&9Скорость атаки +20%"
+      - "&9+2 Броня"
+    glint: false
+    item_flags:
+      - HIDE_ATTRIBUTES
+    resource:
+      material: FLINT
+      generate: false
+      model_path: kriskas:item/perchatka_pos2
+      custom_model_data: 1005
+    attribute_modifiers:
+      offhand:
+        attackSpeed: 0.02
+        armor: 2
+    mechanics:
+      mining_speed:
+        type: PASSIVE_REGEN
+        enabled: true
+        effect:
+          type: FAST_DIGGING
+          duration: 100
+          amplifier: 0
+
   talisman_grani:
     enabled: true
     display_name: "&#f0f034Ξ &fТалисман Грани"
