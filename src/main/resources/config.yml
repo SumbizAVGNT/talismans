@@ -1274,15 +1274,15 @@ items:
 
   anomaly:
     enabled: true
-    display_name: "&#f0f034Ξ &fСфера Скалка"
+    display_name: "&#f0f034Ξ &fАномалия"
     lore:
       - ""
       - "&7Когда во второстпеной руке:"
-      - "&9+2 Броня"
-      - "&9+2 Урон"
+      - "&9+3 Макс. здоровье"
+      - "&9+1 Броня"
       - ""
       - "&d&l⚔ СПОСОБНОСТИ:"
-      - "&5➤ Тьма на атакующем при получении урона"
+      - "&5➤ Случайный эффект раз в 30 сек."
     glint: true
     item_flags:
       - HIDE_ATTRIBUTES
@@ -1293,21 +1293,8 @@ items:
     head_texture_base64: "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWZhYmVlZDQyNGIyNTJhODk0NWE2NDQyYjQ2MmQ1ZjMxNDcwMWE4MTZkYTJkMGE2OWNjZGZjZmQ3NDZlNTg4ZSJ9fX0"
     attribute_modifiers:
       offhand:
-        armor: 2
-        attackDamage: 2
-    mechanics:
-      darkness_on_hit:
-        type: DARKNESS_ON_HIT
-        enabled: true
-        chance: 1.0
-        cooldown: 0
-        effect:
-          type: DARKNESS
-          duration: 60
-          amplifier: 0
-          ambient: true
-          particles: false
-          icon: true
+        armor: 1
+        maxHealth: 3
 
   rage:
     enabled: true
@@ -1346,6 +1333,23 @@ effects:
   mechanics:
     pandora:
       enabled: true
+  anomaly:
+    enabled: true
+    talisman_id: "anomaly"
+    interval: "30s"
+    duration: "30s"
+    positive_chance: 0.95
+    negative_chance: 0.05
+    positive_whitelist:
+      - SPEED
+      - REGENERATION
+      - INCREASE_DAMAGE
+      - DAMAGE_RESISTANCE
+    negative_whitelist:
+      - SLOW
+      - WEAKNESS
+      - POISON
+      - BLINDNESS
 
 limits:
   max_aoe_radius: 10
