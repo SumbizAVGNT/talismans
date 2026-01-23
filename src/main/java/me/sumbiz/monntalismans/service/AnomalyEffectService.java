@@ -143,7 +143,7 @@ public final class AnomalyEffectService {
                 id = NexoItems.idFromItem(offhand);
             } catch (Throwable ignored) {}
         }
-        return talismanId.equalsIgnoreCase(id);
+        return matchesTalismanId(talismanId, id);
     }
 
     private EffectSpec chooseEffect(List<EffectSpec> positiveAvailable, List<EffectSpec> negativeAvailable) {
@@ -251,6 +251,25 @@ public final class AnomalyEffectService {
         if (val < 0.0) return 0.0;
         if (val > 1.0) return 1.0;
         return val;
+    }
+
+    private static boolean matchesTalismanId(String configuredId, String itemId) {
+        if (configuredId == null || itemId == null) return false;
+        String cfg = configuredId.trim();
+        String id = itemId.trim();
+        if (cfg.isEmpty() || id.isEmpty()) return false;
+
+        if (cfg.equalsIgnoreCase(id)) return true;
+
+        String cfgBase = baseId(cfg);
+        String idBase = baseId(id);
+        return cfgBase.equalsIgnoreCase(idBase);
+    }
+
+    private static String baseId(String raw) {
+        int idx = raw.indexOf(':');
+        if (idx == -1) return raw;
+        return raw.substring(idx + 1);
     }
 
     private static PotionEffectType resolvePotionEffect(String raw) {
