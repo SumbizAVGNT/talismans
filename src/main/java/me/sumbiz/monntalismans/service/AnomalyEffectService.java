@@ -23,6 +23,12 @@ public final class AnomalyEffectService {
 
     private static final long DEFAULT_INTERVAL_MS = 30_000L;
     private static final long DEFAULT_DURATION_MS = 30_000L;
+    private static final Map<String, String> LEGACY_EFFECT_ALIASES = Map.ofEntries(
+            Map.entry("INCREASE_DAMAGE", "STRENGTH"),
+            Map.entry("DAMAGE_RESISTANCE", "RESISTANCE"),
+            Map.entry("SLOW", "SLOWNESS"),
+            Map.entry("CONFUSION", "NAUSEA")
+    );
 
     private final Plugin plugin;
     private final ItemService itemService;
@@ -197,7 +203,7 @@ public final class AnomalyEffectService {
     private EffectSpec parseEffectSpecFromString(String raw, Logger log, String key) {
         if (raw == null || raw.isBlank()) return null;
         String[] parts = raw.split(":", 2);
-        PotionEffectType type = PotionEffectType.getByName(parts[0].trim().toUpperCase(Locale.ROOT));
+        PotionEffectType type = resolvePotionEffect(parts[0]);
         if (type == null) {
             log.warning("[Anomaly] Unknown potion type '" + raw + "' in " + key);
             return null;
@@ -213,7 +219,7 @@ public final class AnomalyEffectService {
 
     private EffectSpec parseEffectSpecFromMap(String typeRaw, Map<?, ?> map, Logger log, String key) {
         if (typeRaw == null || typeRaw.isBlank()) return null;
-        PotionEffectType type = PotionEffectType.getByName(typeRaw.trim().toUpperCase(Locale.ROOT));
+        PotionEffectType type = resolvePotionEffect(typeRaw);
         if (type == null) {
             log.warning("[Anomaly] Unknown potion type '" + typeRaw + "' in " + key);
             return null;
@@ -245,6 +251,30 @@ public final class AnomalyEffectService {
         if (val < 0.0) return 0.0;
         if (val > 1.0) return 1.0;
         return val;
+    }
+
+    private static PotionEffectType resolvePotionEffect(String raw) {
+        if (raw == null) return null;
+        String normalized = raw.trim().toUpperCase(Locale.ROOT);
+        if (normalized.isEmpty()) return null;
+
+        PotionEffectType type = PotionEffectType.getByName(normalized);
+        if (type != null) return type;
+
+        String legacy = LEGACY_EFFECT_ALIASES.get(normalized);
+        if (legacy != null) {
+            type = PotionEffectType.getByName(legacy);
+            if (type != null) return type;
+        }
+
+        for (PotionEffectType effect : PotionEffectType.values()) {
+            if (effect == null) continue;
+            if (normalized.equalsIgnoreCase(effect.getName())) {
+                return effect;
+            }
+        }
+
+        return null;
     }
 
     private record EffectSpec(PotionEffectType type, int amplifier, boolean ambient, boolean particles, boolean icon) {}
