@@ -43,6 +43,7 @@ public final class AnomalyEffectService {
     private int durationTicks;
     private List<EffectSpec> positiveEffects = Collections.emptyList();
     private List<EffectSpec> negativeEffects = Collections.emptyList();
+    private ItemStack talismanPrototype;
 
     public AnomalyEffectService(Plugin plugin, ItemService itemService) {
         this.plugin = plugin;
@@ -65,6 +66,7 @@ public final class AnomalyEffectService {
 
         enabled = section.getBoolean("enabled", true);
         talismanId = section.getString("talisman_id", "anomaly");
+        talismanPrototype = talismanId == null ? null : itemService.create(talismanId, 1);
 
         long intervalMs = DurationParser.parseToMillis(section.getString("interval", "30s"));
         intervalMs = Math.max(1000L, intervalMs == 0 ? DEFAULT_INTERVAL_MS : intervalMs);
@@ -138,12 +140,17 @@ public final class AnomalyEffectService {
         if (offhand == null || offhand.getType().isAir()) return false;
 
         String id = itemService.getItemId(offhand);
-        if (id == null) {
-            try {
-                id = NexoItems.idFromItem(offhand);
-            } catch (Throwable ignored) {}
-        }
-        return matchesTalismanId(talismanId, id);
+        if (matchesTalismanId(talismanId, id)) return true;
+        if (id != null) return false;
+
+        String nexoId = null;
+        try {
+            nexoId = NexoItems.idFromItem(offhand);
+        } catch (Throwable ignored) {}
+        if (matchesTalismanId(talismanId, nexoId)) return true;
+        if (nexoId != null) return false;
+
+        return talismanPrototype != null && offhand.isSimilar(talismanPrototype);
     }
 
     private EffectSpec chooseEffect(List<EffectSpec> positiveAvailable, List<EffectSpec> negativeAvailable) {
