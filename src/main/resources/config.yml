@@ -1295,6 +1295,28 @@ items:
       offhand:
         armor: 1
         maxHealth: 3
+    mechanics:
+      anomaly:
+        enabled: true
+        talisman_id: "anomaly"
+        interval: "30s"
+        duration: "30s"
+        positive_chance: 0.95
+        negative_chance: 0.05
+        positive_whitelist:
+          - SPEED
+          - REGENERATION
+          - INCREASE_DAMAGE
+          - DAMAGE_RESISTANCE
+          - FIRE_RESISTANCE
+          - ABSORPTION
+        negative_whitelist:
+          - SLOW
+          - WEAKNESS
+          - POISON
+          - BLINDNESS
+          - HUNGER
+          - CONFUSION
 
   rage:
     enabled: true
@@ -1333,23 +1355,6 @@ effects:
   mechanics:
     pandora:
       enabled: true
-  anomaly:
-    enabled: true
-    talisman_id: "anomaly"
-    interval: "30s"
-    duration: "30s"
-    positive_chance: 0.95
-    negative_chance: 0.05
-    positive_whitelist:
-      - SPEED
-      - REGENERATION
-      - INCREASE_DAMAGE
-      - DAMAGE_RESISTANCE
-    negative_whitelist:
-      - SLOW
-      - WEAKNESS
-      - POISON
-      - BLINDNESS
 
 limits:
   max_aoe_radius: 10
