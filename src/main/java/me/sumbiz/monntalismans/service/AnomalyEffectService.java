@@ -45,7 +45,10 @@ public final class AnomalyEffectService {
     }
 
     public void reload() {
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("effects.anomaly");
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("items.anomaly.mechanics.anomaly");
+        if (section == null) {
+            section = plugin.getConfig().getConfigurationSection("effects.anomaly");
+        }
         Logger log = plugin.getLogger();
 
         if (section == null) {
