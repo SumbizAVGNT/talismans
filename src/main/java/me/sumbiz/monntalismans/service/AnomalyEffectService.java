@@ -110,8 +110,6 @@ public final class AnomalyEffectService {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!hasAnomalyTalisman(player)) continue;
 
-            if (hasAnyWhitelistedEffect(player)) continue;
-
             List<EffectSpec> positiveAvailable = filterAvailable(player, positiveEffects);
             List<EffectSpec> negativeAvailable = filterAvailable(player, negativeEffects);
 
@@ -127,20 +125,6 @@ public final class AnomalyEffectService {
                     toApply.icon()
             ));
         }
-    }
-
-    private boolean hasAnyWhitelistedEffect(Player player) {
-        for (EffectSpec spec : positiveEffects) {
-            if (player.hasPotionEffect(spec.type())) {
-                return true;
-            }
-        }
-        for (EffectSpec spec : negativeEffects) {
-            if (player.hasPotionEffect(spec.type())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean hasAnomalyTalisman(Player player) {
