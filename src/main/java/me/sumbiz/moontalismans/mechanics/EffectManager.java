@@ -2,11 +2,7 @@ package me.sumbiz.moontalismans.mechanics;
 
 import me.sumbiz.moontalismans.MoonTalismansPlugin;
 import me.sumbiz.moontalismans.TalismanItem;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,8 +13,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,11 +26,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Manages passive effects, cooldowns, and active abilities for talismans and spheres.
+ * Uses batched processing and async computation to minimize main-thread load.
+ * All mechanic logic is delegated to {@link MechanicEngine}.
  */
 public class EffectManager implements Listener {
+
+    private static final int PASSIVE_BATCH_DIVISOR = 4;
 
     private final MoonTalismansPlugin plugin;
     private final NamespacedKey keyId;
@@ -46,84 +48,39 @@ public class EffectManager implements Listener {
     private final long effectRefreshIntervalTicks;
     private final long particleIntervalTicks;
 
-    private final boolean phoenixEnabled;
-    private final boolean healerEnabled;
-    private final boolean tritonEnabled;
-    private final boolean graniEnabled;
-    private final boolean aegisEnabled;
-    private final boolean magmaEnabled;
-    private final boolean athenaEnabled;
-    private final boolean theurgyEnabled;
-    private final boolean iasoEnabled;
-    private final boolean cobraEnabled;
-    private final boolean echidnaEnabled;
-    private final boolean punisherEnabled;
-    private final boolean kraitEnabled;
-    private final boolean crusherEnabled;
-    private final boolean chimeraEnabled;
-    private final boolean pandoraEnabled;
-    private final boolean titanEnabled;
-    private final boolean osirisEnabled;
-
-    private final double phoenixLowHealthThreshold;
-    private final double phoenixReviveHealthMultiplier;
-    private final long phoenixCooldownMs;
-
-    private final PotionSetting phoenixLowHealthRegen;
-    private final PotionSetting phoenixReviveRegen;
-    private final PotionSetting phoenixReviveFireResistance;
-    private final PotionSetting healerRegeneration;
-    private final PotionSetting tritonBreath;
-    private final PotionSetting graniCombatSpeed;
-    private final PotionSetting graniOnDamageSpeed;
-    private final PotionSetting aegisResistance;
-    private final PotionSetting magmaResistance;
-    private final PotionSetting athenaStrength;
-    private final PotionSetting theurgyAbsorption;
-    private final PotionSetting iasoSaturation;
-    private final PotionSetting cobraPoison;
-    private final PotionSetting kraitSlow;
-    private final PotionSetting crusherMiningFatigue;
-    private final PotionSetting crusherNausea;
-    private final PotionSetting chimeraEffectDuration;
-    private final PotionSetting pandoraWeakness;
-    private final PotionSetting titanResistance;
-
-    private final double cobraPoisonChance;
-    private final double echidnaLifesteal;
-    private final double punisherCritBonus;
-    private final double kraitSlowChance;
-    private final double crusherStunChance;
-    private final double chimeraRandomChance;
-    private final double pandoraAoeChance;
-    private final double aegisDamageReduction;
-    private final double osirisReflect;
-    private final double athenaHealthThreshold;
-    private final double pandoraRadius;
-    private final double pandoraPotionDurationChance;
-    private final double pandoraPotionDurationMultiplier;
-
-    // Cooldowns per player per item
+    // Cooldowns per player per ability
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
     // Active effects per player
     private final Map<UUID, Set<String>> activeEffects = new ConcurrentHashMap<>();
     private final Map<UUID, String> lastPassiveItemId = new ConcurrentHashMap<>();
     private final Map<UUID, Set<PotionEffectType>> lastPassivePotionEffects = new ConcurrentHashMap<>();
-    private final Set<UUID> pandoraPotionExtensionInProgress = new HashSet<>();
+    private final Set<UUID> pandoraPotionExtensionInProgress = ConcurrentHashMap.newKeySet();
 
-    // Particle task
+    // Player-Item cache: avoids repeated PDC lookups in event handlers
+    private final Map<UUID, CachedPlayerItem> playerItemCache = new ConcurrentHashMap<>();
+
+    // Deferred particle queue: particles computed during mechanics, flushed async
+    private final ConcurrentLinkedQueue<DeferredParticle> particleQueue = new ConcurrentLinkedQueue<>();
+
+    // Scheduled tasks
+    private BukkitRunnable passiveEffectTask;
     private BukkitRunnable particleTask;
+    private int cooldownCleanupTaskId = -1;
+    private int particleFlushTaskId = -1;
+
+    // Batched passive processing state
+    private int passiveBatchIndex = 0;
 
     public EffectManager(MoonTalismansPlugin plugin) {
         this.plugin = plugin;
         this.keyId = new NamespacedKey(plugin, "talisman_id");
         this.keyType = new NamespacedKey(plugin, "talisman_type");
         this.mechanicEngine = new MechanicEngine(plugin);
+        this.mechanicEngine.setParticleConsumer((loc, particle) ->
+            queueParticle(loc.clone().add(0, 1, 0), particle, 10, 0.3, 0.3, 0.3, 0.05));
 
         ConfigurationSection effectsSection = plugin.getConfig().getConfigurationSection("effects");
-        ConfigurationSection mechanicsSection = effectsSection != null
-            ? effectsSection.getConfigurationSection("mechanics") : null;
 
         passiveEffectsEnabled = effectsSection == null || effectsSection.getBoolean("passive_effects_enabled", true);
         particlesEnabled = effectsSection == null || effectsSection.getBoolean("particles_enabled", true);
@@ -132,152 +89,223 @@ public class EffectManager implements Listener {
         particleIntervalTicks = Math.max(1L, effectsSection != null
             ? effectsSection.getLong("particle_interval", 10L) : 10L);
 
-        phoenixEnabled = isMechanicEnabled(mechanicsSection, "phoenix", false);
-        healerEnabled = isMechanicEnabled(mechanicsSection, "healer", false);
-        tritonEnabled = isMechanicEnabled(mechanicsSection, "triton", false);
-        graniEnabled = isMechanicEnabled(mechanicsSection, "grani", false);
-        aegisEnabled = isMechanicEnabled(mechanicsSection, "aegis", false);
-        magmaEnabled = isMechanicEnabled(mechanicsSection, "magma", false);
-        athenaEnabled = isMechanicEnabled(mechanicsSection, "athena", false);
-        theurgyEnabled = isMechanicEnabled(mechanicsSection, "theurgy", false);
-        iasoEnabled = isMechanicEnabled(mechanicsSection, "iaso", false);
-        cobraEnabled = isMechanicEnabled(mechanicsSection, "cobra", false);
-        echidnaEnabled = isMechanicEnabled(mechanicsSection, "echidna", false);
-        punisherEnabled = isMechanicEnabled(mechanicsSection, "punisher", false);
-        kraitEnabled = isMechanicEnabled(mechanicsSection, "krait", false);
-        crusherEnabled = isMechanicEnabled(mechanicsSection, "crusher", false);
-        chimeraEnabled = isMechanicEnabled(mechanicsSection, "chimera", false);
-        pandoraEnabled = isMechanicEnabled(mechanicsSection, "pandora", false);
-        titanEnabled = isMechanicEnabled(mechanicsSection, "titan", false);
-        osirisEnabled = isMechanicEnabled(mechanicsSection, "osiris", false);
-
-        phoenixLowHealthThreshold = readDouble(mechanicsSection, "phoenix.low_health_threshold", 0.3);
-        phoenixReviveHealthMultiplier = readDouble(mechanicsSection, "phoenix.revive.health_multiplier", 0.3);
-        phoenixCooldownMs = readLong(mechanicsSection, "phoenix.cooldown",
-            effectsSection != null ? effectsSection.getLong("phoenix_cooldown", 300000L) : 300000L);
-
-        phoenixLowHealthRegen = readPotion(mechanicsSection, "phoenix.low_health_regeneration", 60, 1);
-        phoenixReviveRegen = readPotion(mechanicsSection, "phoenix.revive.regeneration", 100, 2);
-        phoenixReviveFireResistance = readPotion(mechanicsSection, "phoenix.revive.fire_resistance", 100, 0);
-        healerRegeneration = readPotion(mechanicsSection, "healer.regeneration", 60, 0);
-        tritonBreath = readPotion(mechanicsSection, "triton.water_breathing", 100, 0);
-        graniCombatSpeed = readPotion(mechanicsSection, "grani.combat_speed", 60, 0);
-        graniOnDamageSpeed = readPotion(mechanicsSection, "grani.on_damage_speed", 60, 1);
-        aegisResistance = readPotion(mechanicsSection, "aegis.resistance", 60, 0);
-        magmaResistance = readPotion(mechanicsSection, "magma.fire_resistance", 60, 0);
-        athenaStrength = readPotion(mechanicsSection, "athena.strength", 60, 0);
-        theurgyAbsorption = readPotion(mechanicsSection, "theurgy.absorption", 200, 0);
-        iasoSaturation = readPotion(mechanicsSection, "iaso.saturation", 60, 0);
-        cobraPoison = readPotion(mechanicsSection, "cobra.poison", 60, 0);
-        kraitSlow = readPotion(mechanicsSection, "krait.slowness", 40, 1);
-        crusherMiningFatigue = readPotion(mechanicsSection, "crusher.mining_fatigue", 60, 2);
-        crusherNausea = readPotion(mechanicsSection, "crusher.nausea", 60, 0);
-        chimeraEffectDuration = readPotion(mechanicsSection, "chimera.effect", 60, 0);
-        pandoraWeakness = readPotion(mechanicsSection, "pandora.weakness", 60, 0);
-        titanResistance = readPotion(mechanicsSection, "titan.resistance", 40, 0);
-
-        cobraPoisonChance = readDouble(mechanicsSection, "cobra.chance",
-            readLegacyDouble(effectsSection, "chances.cobra_poison", 0.30));
-        echidnaLifesteal = readDouble(mechanicsSection, "echidna.lifesteal",
-            readLegacyDouble(effectsSection, "multipliers.echidna_lifesteal", 0.15));
-        punisherCritBonus = readDouble(mechanicsSection, "punisher.crit_bonus",
-            readLegacyDouble(effectsSection, "multipliers.punisher_crit_bonus", 1.20));
-        kraitSlowChance = readDouble(mechanicsSection, "krait.chance",
-            readLegacyDouble(effectsSection, "chances.krait_slow", 0.25));
-        crusherStunChance = readDouble(mechanicsSection, "crusher.chance",
-            readLegacyDouble(effectsSection, "chances.crusher_stun", 0.20));
-        chimeraRandomChance = readDouble(mechanicsSection, "chimera.chance",
-            readLegacyDouble(effectsSection, "chances.chimera_random", 0.35));
-        pandoraAoeChance = readDouble(mechanicsSection, "pandora.chance",
-            readLegacyDouble(effectsSection, "chances.pandora_aoe", 0.25));
-        aegisDamageReduction = readDouble(mechanicsSection, "aegis.damage_reduction",
-            readLegacyDouble(effectsSection, "multipliers.aegis_damage_reduction", 0.90));
-        osirisReflect = readDouble(mechanicsSection, "osiris.reflect",
-            readLegacyDouble(effectsSection, "multipliers.osiris_reflect", 0.15));
-        athenaHealthThreshold = readDouble(mechanicsSection, "athena.health_threshold", 0.5);
-        pandoraRadius = readDouble(mechanicsSection, "pandora.radius", 3.0);
-        pandoraPotionDurationChance = readDouble(mechanicsSection, "pandora.potion_duration_chance", 0.5);
-        pandoraPotionDurationMultiplier = readDouble(mechanicsSection, "pandora.potion_duration_multiplier", 2.0);
-
         startPassiveEffectTask();
         startParticleTask();
+        startCooldownCleanupTask();
+        startParticleFlushTask();
     }
 
-    private boolean isMechanicEnabled(ConfigurationSection mechanics, String path, boolean defaultValue) {
-        if (mechanics == null) return defaultValue;
-        ConfigurationSection section = mechanics.getConfigurationSection(path);
-        if (section != null && section.isSet("enabled")) {
-            return section.getBoolean("enabled");
+    // ========== RECORDS ==========
+
+    private record CachedPlayerItem(String itemId, TalismanItem item, long cachedAt) {
+        boolean isExpired() {
+            return System.currentTimeMillis() - cachedAt > 1000; // 1 second TTL
         }
-        return defaultValue;
     }
 
-    private PotionSetting readPotion(ConfigurationSection mechanics, String path, int defaultDuration, int defaultAmplifier) {
-        if (mechanics == null) return new PotionSetting(defaultDuration, defaultAmplifier);
-        ConfigurationSection section = mechanics.getConfigurationSection(path);
-        if (section == null) return new PotionSetting(defaultDuration, defaultAmplifier);
-        int duration = section.getInt("duration", defaultDuration);
-        int amplifier = section.getInt("amplifier", defaultAmplifier);
-        return new PotionSetting(duration, amplifier);
-    }
+    private record DeferredParticle(World world, double x, double y, double z,
+                                     Particle particle, int count,
+                                     double offsetX, double offsetY, double offsetZ,
+                                     double extra, Object data) {}
 
-    private double readDouble(ConfigurationSection mechanics, String path, double defaultValue) {
-        if (mechanics != null && mechanics.isSet(path)) {
-            return mechanics.getDouble(path, defaultValue);
-        }
-        return defaultValue;
-    }
+    private record PandoraPotionSettings(boolean enabled, double chance, double multiplier) {}
 
-    private double readLegacyDouble(ConfigurationSection effects, String path, double defaultValue) {
-        if (effects != null && effects.isSet(path)) {
-            return effects.getDouble(path, defaultValue);
-        }
-        return defaultValue;
-    }
-
-    private long readLong(ConfigurationSection mechanics, String path, long defaultValue) {
-        if (mechanics != null && mechanics.isSet(path)) {
-            return mechanics.getLong(path, defaultValue);
-        }
-        return defaultValue;
-    }
+    // ========== SCHEDULED TASKS ==========
 
     /**
-     * Task that applies passive potion effects every 2 seconds.
+     * Batched passive effect processing: instead of processing ALL players every N ticks,
+     * processes 1/BATCH_DIVISOR of players per tick at a higher frequency.
+     * This spreads the CPU load across multiple ticks for smoother performance.
      */
     private void startPassiveEffectTask() {
         if (!passiveEffectsEnabled) return;
-        new BukkitRunnable() {
+        long batchInterval = Math.max(1L, effectRefreshIntervalTicks / PASSIVE_BATCH_DIVISOR);
+        passiveEffectTask = new BukkitRunnable() {
             @Override
             public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    applyPassiveEffects(player);
+                List<? extends Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+                if (players.isEmpty()) return;
+
+                int totalPlayers = players.size();
+                int batchSize = Math.max(1, (totalPlayers + PASSIVE_BATCH_DIVISOR - 1) / PASSIVE_BATCH_DIVISOR);
+
+                if (passiveBatchIndex >= totalPlayers) {
+                    passiveBatchIndex = 0;
                 }
+
+                int end = Math.min(passiveBatchIndex + batchSize, totalPlayers);
+                for (int i = passiveBatchIndex; i < end; i++) {
+                    applyPassiveEffects(players.get(i));
+                }
+                passiveBatchIndex = end;
             }
-        }.runTaskTimer(plugin, 20L, effectRefreshIntervalTicks);
+        };
+        passiveEffectTask.runTaskTimer(plugin, 20L, batchInterval);
     }
 
     /**
-     * Task that spawns particles around players with special items.
+     * Particle computation runs async: gathers player locations and item data,
+     * computes particle positions off the main thread, then queues them for sync flush.
      */
     private void startParticleTask() {
         if (!particlesEnabled) return;
         particleTask = new BukkitRunnable() {
             @Override
             public void run() {
+                // Gather snapshot data on main thread
+                List<ParticleSnapshot> snapshots = new ArrayList<>();
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    spawnAmbientParticles(player);
+                    CachedPlayerItem cached = getCachedItem(player);
+                    if (cached == null || cached.item() == null) continue;
+                    if (!cached.item().isSphere()) continue;
+
+                    snapshots.add(new ParticleSnapshot(
+                        player.getWorld(),
+                        player.getLocation().getX(),
+                        player.getLocation().getY() + 1.0,
+                        player.getLocation().getZ()
+                    ));
                 }
+
+                if (snapshots.isEmpty()) return;
+
+                // Compute particle positions async and queue them
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                    for (ParticleSnapshot snap : snapshots) {
+                        computeCircleParticles(snap.world, snap.x, snap.y, snap.z,
+                            Particle.DUST, 2, 0.25);
+                    }
+                });
             }
         };
         particleTask.runTaskTimer(plugin, 10L, particleIntervalTicks);
     }
 
-    private void applyPassiveEffects(Player player) {
+    private record ParticleSnapshot(World world, double x, double y, double z) {}
+
+    private void computeCircleParticles(World world, double cx, double cy, double cz,
+                                         Particle particle, int count, double radius) {
+        for (int i = 0; i < count; i++) {
+            double angle = (2 * Math.PI * i) / count;
+            double x = cx + radius * Math.cos(angle);
+            double z = cz + radius * Math.sin(angle);
+            particleQueue.add(new DeferredParticle(
+                world, x, cy, z, particle, 1,
+                0, 0, 0, 0,
+                particle == Particle.DUST ? new Particle.DustOptions(Color.fromRGB(128, 0, 255), 1.0f) : null
+            ));
+        }
+    }
+
+    /**
+     * Flushes queued particles on the main thread at a fixed rate.
+     * Limits particles per flush to prevent lag spikes.
+     */
+    private void startParticleFlushTask() {
+        particleFlushTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            int flushed = 0;
+            int maxPerFlush = 100;
+            DeferredParticle p;
+            while (flushed < maxPerFlush && (p = particleQueue.poll()) != null) {
+                if (p.data() != null) {
+                    p.world().spawnParticle(p.particle(), p.x(), p.y(), p.z(), p.count(), p.data());
+                } else {
+                    p.world().spawnParticle(p.particle(), p.x(), p.y(), p.z(), p.count(),
+                        p.offsetX(), p.offsetY(), p.offsetZ(), p.extra());
+                }
+                flushed++;
+            }
+        }, 2L, 2L);
+    }
+
+    /**
+     * Async task that periodically cleans up expired cooldowns to prevent memory growth.
+     */
+    private void startCooldownCleanupTask() {
+        cooldownCleanupTaskId = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            long now = System.currentTimeMillis();
+            cooldowns.forEach((uuid, map) -> {
+                map.entrySet().removeIf(entry -> entry.getValue() < now);
+                if (map.isEmpty()) cooldowns.remove(uuid);
+            });
+            mechanicEngine.cleanExpiredCooldowns(now);
+
+            // Clean expired item cache entries async
+            playerItemCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        }, 6000L, 6000L).getTaskId();
+    }
+
+    // ========== PLAYER-ITEM CACHE ==========
+
+    /**
+     * Gets the cached TalismanItem for a player. Returns null if not cached or expired.
+     * Cache is populated on passive effect processing and invalidated on item swap/quit.
+     */
+    private CachedPlayerItem getCachedItem(Player player) {
+        CachedPlayerItem cached = playerItemCache.get(player.getUniqueId());
+        if (cached != null && !cached.isExpired()) {
+            return cached;
+        }
+        return null;
+    }
+
+    /**
+     * Resolves and caches the player's offhand TalismanItem.
+     * Returns the resolved TalismanItem or null.
+     */
+    private TalismanItem resolveAndCacheItem(Player player) {
         ItemStack offhand = player.getInventory().getItemInOffHand();
         String itemId = getItemId(offhand);
 
         if (itemId == null) {
+            playerItemCache.remove(player.getUniqueId());
+            return null;
+        }
+
+        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
+        if (itemOpt.isEmpty()) {
+            playerItemCache.remove(player.getUniqueId());
+            return null;
+        }
+
+        TalismanItem item = itemOpt.get();
+        playerItemCache.put(player.getUniqueId(),
+            new CachedPlayerItem(itemId, item, System.currentTimeMillis()));
+        return item;
+    }
+
+    /**
+     * Gets the player's TalismanItem, using cache if available, otherwise resolving fresh.
+     */
+    private TalismanItem getPlayerItem(Player player) {
+        CachedPlayerItem cached = getCachedItem(player);
+        if (cached != null) {
+            return cached.item();
+        }
+        return resolveAndCacheItem(player);
+    }
+
+    private String getPlayerItemId(Player player) {
+        CachedPlayerItem cached = getCachedItem(player);
+        if (cached != null) {
+            return cached.itemId();
+        }
+        resolveAndCacheItem(player);
+        CachedPlayerItem fresh = playerItemCache.get(player.getUniqueId());
+        return fresh != null ? fresh.itemId() : null;
+    }
+
+    // ========== PASSIVE EFFECTS ==========
+
+    private void applyPassiveEffects(Player player) {
+        TalismanItem item = resolveAndCacheItem(player);
+        String itemId = null;
+        CachedPlayerItem cached = playerItemCache.get(player.getUniqueId());
+        if (cached != null) {
+            itemId = cached.itemId();
+        }
+
+        if (item == null) {
             clearPassiveEffects(player);
             activeEffects.remove(player.getUniqueId());
             lastPassiveItemId.remove(player.getUniqueId());
@@ -291,16 +319,6 @@ public class EffectManager implements Listener {
             lastPassivePotionEffects.remove(player.getUniqueId());
         }
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) {
-            clearPassiveEffects(player);
-            activeEffects.remove(player.getUniqueId());
-            lastPassiveItemId.remove(player.getUniqueId());
-            lastPassivePotionEffects.remove(player.getUniqueId());
-            return;
-        }
-
-        TalismanItem item = itemOpt.get();
         lastPassiveItemId.put(player.getUniqueId(), itemId);
         lastPassivePotionEffects.put(player.getUniqueId(), collectPassivePotionEffects(item));
 
@@ -308,85 +326,8 @@ public class EffectManager implements Listener {
             return;
         }
 
-        // Apply built-in passive effects based on item ID patterns
-        applyBuiltInPassiveEffects(player, item);
-
-        // Apply new mechanic system
-        mechanicEngine.applyPassiveMechanics(player, item);
-    }
-
-    /**
-     * Apply passive effects based on talisman/sphere type.
-     */
-    private void applyBuiltInPassiveEffects(Player player, TalismanItem item) {
-        String id = item.getId().toLowerCase();
-
-        if (!passiveEffectsEnabled) {
-            return;
-        }
-
         applyConfiguredPassivePotions(player, item);
-
-        // Феникс - регенерация при низком здоровье
-        if (phoenixEnabled && (id.contains("feniksa") || id.contains("phoenix"))) {
-            if (player.getHealth() < player.getMaxHealth() * phoenixLowHealthThreshold) {
-                addPotion(player, PotionEffectType.REGENERATION, phoenixLowHealthRegen, true, false, true);
-            }
-        }
-
-        // Лекарь - постоянная медленная регенерация
-        if (healerEnabled && (id.contains("lekarya") || id.contains("healer"))) {
-            addPotion(player, PotionEffectType.REGENERATION, healerRegeneration, true, false, true);
-        }
-
-        // Тритон - водное дыхание
-        if (tritonEnabled && (id.contains("tritona") || id.contains("triton"))) {
-            if (player.isInWater()) {
-                addPotion(player, PotionEffectType.WATER_BREATHING, tritonBreath, true, false, true);
-                addPotion(player, PotionEffectType.DOLPHINS_GRACE, tritonBreath, true, false, true);
-            }
-        }
-
-        // Грани - ускорение в бою
-        if (graniEnabled && (id.contains("grani") || id.contains("grani"))) {
-            if (player.getLastDamage() > 0 && (System.currentTimeMillis() - player.getLastDamageCause().getEntity().getTicksLived()) < 100) {
-                addPotion(player, PotionEffectType.SPEED, graniCombatSpeed, true, false, true);
-            }
-        }
-
-        // Эгида - сопротивление урону
-        if (aegisEnabled && (id.contains("egida") || id.contains("aegis"))) {
-            addPotion(player, PotionEffectType.RESISTANCE, aegisResistance, true, false, true);
-        }
-
-        // Магма - огнестойкость
-        if (magmaEnabled && id.contains("magma")) {
-            addPotion(player, PotionEffectType.FIRE_RESISTANCE, magmaResistance, true, false, true);
-        }
-
-        // Афина - боевая ярость
-        if (athenaEnabled && (id.contains("afina") || id.contains("athena"))) {
-            // Gives strength when health drops below 50%
-            if (player.getHealth() < player.getMaxHealth() * athenaHealthThreshold) {
-                addPotion(player, PotionEffectType.STRENGTH, athenaStrength, true, false, true);
-            }
-        }
-
-        // Теургия - дополнительное поглощение
-        if (theurgyEnabled && (id.contains("teurgia") || id.contains("theurgy"))) {
-            if (!player.hasPotionEffect(PotionEffectType.ABSORPTION)) {
-                addPotion(player, PotionEffectType.ABSORPTION, theurgyAbsorption, true, false, true);
-            }
-        }
-
-        // Иасо - усиленное исцеление
-        if (iasoEnabled && id.contains("iaso")) {
-            addPotion(player, PotionEffectType.SATURATION, iasoSaturation, true, false, true);
-        }
-    }
-
-    private void addPotion(LivingEntity entity, PotionEffectType type, PotionSetting setting, boolean ambient, boolean particles, boolean icon) {
-        entity.addPotionEffect(new PotionEffect(type, setting.durationTicks(), setting.amplifier(), ambient, particles, icon));
+        mechanicEngine.applyPassiveMechanics(player, item);
     }
 
     private void applyConfiguredPassivePotions(Player player, TalismanItem item) {
@@ -427,188 +368,28 @@ public class EffectManager implements Listener {
                 case KNOCKBACK_IMMUNITY, MAGIC_BARRIER, EXPLOSION_IMMUNITY -> effects.add(PotionEffectType.RESISTANCE);
                 case FALL_DAMAGE_IMMUNITY -> effects.add(PotionEffectType.SLOW_FALLING);
                 case ANGEL_WINGS -> effects.add(PotionEffectType.LEVITATION);
-                case DARK_PACT -> effects.add(PotionEffectType.STRENGTH);
-                case BLOOD_MOON -> effects.add(PotionEffectType.STRENGTH);
+                case DARK_PACT, BLOOD_MOON -> effects.add(PotionEffectType.STRENGTH);
                 case SOLAR_FLARE -> {
                     effects.add(PotionEffectType.RESISTANCE);
                     effects.add(PotionEffectType.REGENERATION);
                 }
-                default -> {
-                }
+                default -> {}
             }
         }
 
-        if (!passiveEffectsEnabled) {
-            return effects;
-        }
-
-        String id = item.getId().toLowerCase();
-        if (phoenixEnabled && (id.contains("feniksa") || id.contains("phoenix"))) {
-            effects.add(PotionEffectType.REGENERATION);
-        }
-        if (healerEnabled && (id.contains("lekarya") || id.contains("healer"))) {
-            effects.add(PotionEffectType.REGENERATION);
-        }
-        if (tritonEnabled && (id.contains("tritona") || id.contains("triton"))) {
-            effects.add(PotionEffectType.WATER_BREATHING);
-            effects.add(PotionEffectType.DOLPHINS_GRACE);
-        }
-        if (graniEnabled && id.contains("grani")) {
-            effects.add(PotionEffectType.SPEED);
-        }
-        if (aegisEnabled && (id.contains("egida") || id.contains("aegis"))) {
-            effects.add(PotionEffectType.RESISTANCE);
-        }
-        if (magmaEnabled && id.contains("magma")) {
-            effects.add(PotionEffectType.FIRE_RESISTANCE);
-        }
-        if (athenaEnabled && (id.contains("afina") || id.contains("athena"))) {
-            effects.add(PotionEffectType.STRENGTH);
-        }
-        if (theurgyEnabled && (id.contains("teurgia") || id.contains("theurgy"))) {
-            effects.add(PotionEffectType.ABSORPTION);
-        }
-        if (iasoEnabled && id.contains("iaso")) {
-            effects.add(PotionEffectType.SATURATION);
-        }
         return effects;
     }
 
-    /**
-     * Spawn ambient particles around players with special items.
-     */
-    private void spawnAmbientParticles(Player player) {
-        if (!particlesEnabled) return;
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-
-        if (itemId == null) return;
-
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
-        String id = item.getId().toLowerCase();
-
-        Location loc = player.getLocation().add(0, 1, 0);
-        World world = player.getWorld();
-
-        // Different particles based on item type
-        if (id.contains("feniksa") || id.contains("phoenix")) {
-            spawnCircleParticles(world, loc, Particle.FLAME, 3, 0.3);
-        } else if (id.contains("magma")) {
-            spawnCircleParticles(world, loc, Particle.LAVA, 2, 0.2);
-        } else if (id.contains("tritona") || id.contains("triton")) {
-            if (player.isInWater()) {
-                spawnCircleParticles(world, loc, Particle.BUBBLE_COLUMN_UP, 5, 0.4);
-            }
-        } else if (id.contains("chimera") || id.contains("himera")) {
-            spawnCircleParticles(world, loc, Particle.ENCHANT, 5, 0.5);
-        } else if (id.contains("apollon") || id.contains("apollo")) {
-            spawnCircleParticles(world, loc, Particle.END_ROD, 2, 0.4);
-        } else if (id.contains("andromeda")) {
-            spawnCircleParticles(world, loc, Particle.PORTAL, 3, 0.3);
-        } else if (id.contains("pandora")) {
-            spawnCircleParticles(world, loc, Particle.WITCH, 2, 0.3);
-        } else if (id.contains("titan")) {
-            spawnCircleParticles(world, loc, Particle.CRIT, 3, 0.4);
-        } else if (item.isSphere()) {
-            // Default sphere particles
-            spawnCircleParticles(world, loc, Particle.DUST, 2, 0.25);
-        }
-    }
-
-    private void spawnCircleParticles(World world, Location center, Particle particle, int count, double radius) {
-        for (int i = 0; i < count; i++) {
-            double angle = (2 * Math.PI * i) / count;
-            double x = center.getX() + radius * Math.cos(angle);
-            double z = center.getZ() + radius * Math.sin(angle);
-
-            if (particle == Particle.DUST) {
-                world.spawnParticle(particle, x, center.getY(), z, 1,
-                    new Particle.DustOptions(Color.fromRGB(128, 0, 255), 1.0f));
-            } else {
-                world.spawnParticle(particle, x, center.getY(), z, 1, 0, 0, 0, 0);
-            }
-        }
-    }
+    // ========== EVENT HANDLERS ==========
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDamageEntity(EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player player)) return;
         if (!(event.getEntity() instanceof LivingEntity target)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
-        if (itemId == null) return;
-
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
-        String id = item.getId().toLowerCase();
-
-        // Кобра - отравление при ударе
-        if (cobraEnabled && (id.contains("kobry") || id.contains("cobra"))) {
-            if (Math.random() < cobraPoisonChance) {
-                addPotion(target, PotionEffectType.POISON, cobraPoison, true, true, true);
-                spawnHitParticles(target.getLocation(), Particle.WITCH);
-            }
-        }
-
-        // Ехидна - высасывание жизни
-        if (echidnaEnabled && (id.contains("ekhidny") || id.contains("echidna"))) {
-            double heal = event.getDamage() * echidnaLifesteal;
-            player.setHealth(Math.min(player.getHealth() + heal, player.getMaxHealth()));
-            spawnHitParticles(player.getLocation(), Particle.HEART);
-        }
-
-        // Каратель - дополнительный урон при критическом ударе
-        if (punisherEnabled && (id.contains("karatelya") || id.contains("punisher"))) {
-            if (player.getFallDistance() > 0 && !player.isOnGround()) {
-                event.setDamage(event.getDamage() * punisherCritBonus);
-                spawnHitParticles(target.getLocation(), Particle.ENCHANTED_HIT);
-            }
-        }
-
-        // Крайт - замедление при ударе
-        if (kraitEnabled && (id.contains("kraita") || id.contains("krait"))) {
-            if (Math.random() < kraitSlowChance) {
-                addPotion(target, PotionEffectType.SLOWNESS, kraitSlow, true, true, true);
-                spawnHitParticles(target.getLocation(), Particle.SNOWFLAKE);
-            }
-        }
-
-        // Крушитель - оглушение при ударе
-        if (crusherEnabled && (id.contains("krushitelya") || id.contains("crusher"))) {
-            if (Math.random() < crusherStunChance) {
-                addPotion(target, PotionEffectType.MINING_FATIGUE, crusherMiningFatigue, true, true, true);
-                addPotion(target, PotionEffectType.NAUSEA, crusherNausea, true, true, true);
-                spawnHitParticles(target.getLocation(), Particle.SONIC_BOOM);
-            }
-        }
-
-        // Химера - случайные эффекты
-        if (chimeraEnabled && (id.contains("chimera") || id.contains("himera"))) {
-            if (Math.random() < chimeraRandomChance) {
-                applyRandomChimeraEffect(target);
-            }
-        }
-
-        // Пандора - распространение эффектов
-        if (pandoraEnabled && id.contains("pandora")) {
-            if (Math.random() < pandoraAoeChance) {
-                for (Entity nearby : target.getNearbyEntities(pandoraRadius, pandoraRadius, pandoraRadius)) {
-                    if (nearby instanceof LivingEntity le && nearby != player) {
-                        addPotion(le, PotionEffectType.WEAKNESS, pandoraWeakness, true, true, true);
-                    }
-                }
-                spawnHitParticles(target.getLocation(), Particle.SCULK_CHARGE_POP);
-            }
-        }
-
-        // Apply new mechanic system
         mechanicEngine.handleAttackMechanics(player, target, event, item);
     }
 
@@ -618,14 +399,9 @@ public class EffectManager implements Listener {
         Player killer = entity.getKiller();
         if (killer == null) return;
 
-        ItemStack offhand = killer.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
+        TalismanItem item = getPlayerItem(killer);
+        if (item == null) return;
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
         for (TalismanMechanic mechanic : item.getMechanics()) {
             if (!mechanic.isEnabled() || mechanic.getType() != MechanicType.HEAL_ON_KILL) {
                 continue;
@@ -637,7 +413,7 @@ public class EffectManager implements Listener {
             }
 
             killer.setHealth(Math.min(killer.getHealth() + heal, killer.getMaxHealth()));
-            spawnHitParticles(killer.getLocation(), Particle.HEART);
+            mechanicEngine.queueParticle(killer.getLocation(), Particle.HEART);
         }
     }
 
@@ -653,18 +429,13 @@ public class EffectManager implements Listener {
         UUID playerId = player.getUniqueId();
         if (pandoraPotionExtensionInProgress.remove(playerId)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
         PandoraPotionSettings settings = getPandoraPotionSettings(item);
         if (settings == null || !settings.enabled()) return;
         if (settings.chance() <= 0 || settings.multiplier() <= 1.0) return;
-        if (Math.random() >= settings.chance()) return;
+        if (ThreadLocalRandom.current().nextDouble() >= settings.chance()) return;
 
         PotionEffect newEffect = event.getNewEffect();
         int duration = newEffect.getDuration();
@@ -694,92 +465,17 @@ public class EffectManager implements Listener {
                 return new PandoraPotionSettings(mechanic.isEnabled(), chance, multiplier);
             }
         }
-
-        String id = item.getId().toLowerCase(Locale.ROOT);
-        if (!pandoraEnabled || !id.contains("pandora")) {
-            return null;
-        }
-        return new PandoraPotionSettings(true, pandoraPotionDurationChance, pandoraPotionDurationMultiplier);
-    }
-
-    private record PandoraPotionSettings(boolean enabled, double chance, double multiplier) {}
-
-    private void applyRandomChimeraEffect(LivingEntity target) {
-        PotionEffectType[] effects = {
-            PotionEffectType.POISON,
-            PotionEffectType.WITHER,
-            PotionEffectType.SLOWNESS,
-            PotionEffectType.WEAKNESS,
-            PotionEffectType.BLINDNESS
-        };
-        PotionEffectType effect = effects[(int) (Math.random() * effects.length)];
-        addPotion(target, effect, chimeraEffectDuration, true, true, true);
-
-        Particle[] particles = {
-            Particle.WITCH, Particle.SOUL, Particle.ENCHANT
-        };
-        spawnHitParticles(target.getLocation(), particles[(int) (Math.random() * particles.length)]);
-    }
-
-    private void spawnHitParticles(Location loc, Particle particle) {
-        loc.getWorld().spawnParticle(particle, loc.add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
+        return null;
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerTakeDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
-        if (itemId == null) return;
-
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
-        String id = item.getId().toLowerCase();
-
-        // Эгида - сокращение урона
-        if (aegisEnabled && (id.contains("egida") || id.contains("aegis"))) {
-            event.setDamage(event.getDamage() * aegisDamageReduction);
-        }
-
-        // Грани - ускорение при получении урона
-        if (graniEnabled && id.contains("grani")) {
-            addPotion(player, PotionEffectType.SPEED, graniOnDamageSpeed, true, false, true);
-        }
-
-        // Титан - устойчивость к отбрасыванию (дополнительная)
-        if (titanEnabled && id.contains("titan")) {
-            // The knockback resistance is already in attributes, but we add extra effect
-            addPotion(player, PotionEffectType.RESISTANCE, titanResistance, true, false, true);
-        }
-
-        // Феникс - второй шанс
-        if (phoenixEnabled && (id.contains("feniksa") || id.contains("phoenix"))) {
-            if (player.getHealth() - event.getFinalDamage() <= 0) {
-                if (!isOnCooldown(player, "phoenix_revive")) {
-                    event.setCancelled(true);
-                    player.setHealth(player.getMaxHealth() * phoenixReviveHealthMultiplier);
-                    addPotion(player, PotionEffectType.REGENERATION, phoenixReviveRegen, true, false, true);
-                    addPotion(player, PotionEffectType.FIRE_RESISTANCE, phoenixReviveFireResistance, true, false, true);
-
-                    // Spawn revival effect
-                    Location loc = player.getLocation();
-                    player.getWorld().spawnParticle(Particle.FLAME, loc.add(0, 1, 0), 50, 0.5, 0.5, 0.5, 0.1);
-                    player.getWorld().spawnParticle(Particle.LAVA, loc, 20, 0.5, 0.5, 0.5, 0);
-                    player.playSound(loc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.5f);
-
-                    setCooldown(player, "phoenix_revive", phoenixCooldownMs);
-                    player.sendMessage(Component.text("⚔ ").color(NamedTextColor.RED).decoration(TextDecoration.BOLD, true)
-                            .append(Component.text("Талисман Феникса спас вас от смерти! ").color(NamedTextColor.YELLOW).decoration(TextDecoration.BOLD, false))
-                            .append(Component.text("(Кулдаун: 5 минут)").color(NamedTextColor.GRAY)));
-                }
-            }
-        }
-
-        // Check death mechanics from new system
+        // Check death mechanics first
         if (player.getHealth() - event.getFinalDamage() <= 0) {
             if (mechanicEngine.handleDeathMechanics(player, event, item)) {
                 event.setCancelled(true);
@@ -787,28 +483,47 @@ public class EffectManager implements Listener {
             }
         }
 
-        // Apply damage mechanics from new system
+        // Apply damage mechanics
         mechanicEngine.handleDamageMechanics(player, event, item);
-
-        if (osirisEnabled) {
-            double reflectMultiplier = item.getDamageReflect().orElse(osirisReflect);
-            if (reflectMultiplier > 0 && event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
-                attacker.damage(event.getDamage() * reflectMultiplier, player);
-                player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
-            }
-        }
     }
 
     @EventHandler
     public void onItemSwap(PlayerSwapHandItemsEvent event) {
-        // Refresh effects when swapping items
+        // Invalidate cache on item swap
+        playerItemCache.remove(event.getPlayer().getUniqueId());
         Bukkit.getScheduler().runTaskLater(plugin, () -> applyPassiveEffects(event.getPlayer()), 1L);
     }
 
     @EventHandler
     public void onItemHeldChange(PlayerItemHeldEvent event) {
-        // Refresh effects when changing held item
+        playerItemCache.remove(event.getPlayer().getUniqueId());
         Bukkit.getScheduler().runTaskLater(plugin, () -> applyPassiveEffects(event.getPlayer()), 1L);
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        clearPassiveEffects(event.getPlayer());
+        cooldowns.remove(uuid);
+        activeEffects.remove(uuid);
+        lastPassiveItemId.remove(uuid);
+        lastPassivePotionEffects.remove(uuid);
+        pandoraPotionExtensionInProgress.remove(uuid);
+        playerItemCache.remove(uuid);
+        mechanicEngine.clearPlayerData(uuid);
+    }
+
+    // ========== UTILITIES ==========
+
+    /**
+     * Queues a particle for deferred spawning (used by EffectManager internally).
+     */
+    void queueParticle(Location loc, Particle particle, int count,
+                       double offsetX, double offsetY, double offsetZ, double extra) {
+        particleQueue.add(new DeferredParticle(
+            loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(),
+            particle, count, offsetX, offsetY, offsetZ, extra, null
+        ));
     }
 
     private String getItemId(ItemStack item) {
@@ -868,15 +583,25 @@ public class EffectManager implements Listener {
     }
 
     public void shutdown() {
+        if (passiveEffectTask != null) {
+            passiveEffectTask.cancel();
+        }
         if (particleTask != null) {
             particleTask.cancel();
+        }
+        if (cooldownCleanupTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(cooldownCleanupTaskId);
+        }
+        if (particleFlushTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(particleFlushTaskId);
         }
         mechanicEngine.cleanup();
         cooldowns.clear();
         activeEffects.clear();
         lastPassiveItemId.clear();
         lastPassivePotionEffects.clear();
+        pandoraPotionExtensionInProgress.clear();
+        playerItemCache.clear();
+        particleQueue.clear();
     }
-
-    private record PotionSetting(int durationTicks, int amplifier) {}
 }
