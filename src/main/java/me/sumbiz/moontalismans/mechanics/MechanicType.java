@@ -73,6 +73,9 @@ public enum MechanicType {
     /** Увеличение длительности эффектов зелий (механика сферы Пандоры) */
     PANDORA_POTION_EXTENSION,
 
+    /** Случайные эффекты по таймеру (механика Аномалии) */
+    ANOMALY_EFFECT,
+
     // ========== 20 НОВЫХ КРУТЫХ МЕХАНИК ==========
 
     /** Взрыв при смерти, наносящий урон врагам вокруг */
@@ -337,7 +340,7 @@ public enum MechanicType {
                  REPAIR_EQUIPMENT, BLOOD_MOON, SOLAR_FLARE, ELEMENTAL_IMMUNITY,
                  SPIRIT_WALK, POISON_IMMUNITY, WITHER_IMMUNITY, SLOWNESS_IMMUNITY, WEAKNESS_IMMUNITY,
                  KNOCKBACK_IMMUNITY, FALL_DAMAGE_IMMUNITY, EXPLOSION_IMMUNITY,
-                 MAGIC_BARRIER, ANGEL_WINGS, DARK_PACT -> true;
+                 MAGIC_BARRIER, ANGEL_WINGS, DARK_PACT, ANOMALY_EFFECT -> true;
             default -> false;
         };
     }

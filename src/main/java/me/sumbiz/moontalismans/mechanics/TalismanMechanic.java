@@ -99,6 +99,20 @@ public class TalismanMechanic {
         return Collections.emptyList();
     }
 
+    public List<String> getStringList(String key) {
+        Object value = parameters.get(key);
+        if (value instanceof List<?> list) {
+            List<String> result = new ArrayList<>();
+            for (Object item : list) {
+                if (item != null) {
+                    result.add(item.toString());
+                }
+            }
+            return result;
+        }
+        return Collections.emptyList();
+    }
+
     /**
      * Парсинг механики из конфига.
      * Формат:

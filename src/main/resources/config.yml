@@ -201,27 +201,27 @@ items:
         armor: 1
         maxHealth: 3
     mechanics:
-      anomaly:
+      anomaly_effect:
+        type: ANOMALY_EFFECT
         enabled: true
-        talisman_id: "anomaly"
-        interval: "30s"
-        duration: "30s"
+        cooldown: 30000
+        duration: 600
         positive_chance: 0.95
         negative_chance: 0.05
-        positive_whitelist:
+        positive_effects:
           - SPEED
           - REGENERATION
-          - INCREASE_DAMAGE
-          - DAMAGE_RESISTANCE
+          - STRENGTH
+          - RESISTANCE
           - FIRE_RESISTANCE
           - ABSORPTION
-        negative_whitelist:
-          - SLOW
+        negative_effects:
+          - SLOWNESS
           - WEAKNESS
           - POISON
           - BLINDNESS
           - HUNGER
-          - CONFUSION
+          - NAUSEA
   talisman_manesa:
     enabled: true
     display_name: "&#f0f034Ξ &fТалисман Манеса"
@@ -332,6 +332,11 @@ items:
       offhand:
         attackDamage: 5
         movementSpeed: -0.015
+    mechanics:
+      damage_reflect:
+        type: DAMAGE_REFLECT
+        enabled: true
+        percent: 0.15
 
   talisman_krushitelya:
     enabled: true
@@ -841,6 +846,12 @@ items:
         attackDamage: 5
         movementSpeed: 0.010
         armor: -2
+    mechanics:
+      potion_extension:
+        type: PANDORA_POTION_EXTENSION
+        enabled: true
+        chance: 0.5
+        multiplier: 2.0
 
   titan:
     enabled: true
