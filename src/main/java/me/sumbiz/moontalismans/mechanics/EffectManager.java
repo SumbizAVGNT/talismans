@@ -26,13 +26,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Manages passive effects, cooldowns, and active abilities for talismans and spheres.
+ * Uses batched processing and async computation to minimize main-thread load.
  * All mechanic logic is delegated to {@link MechanicEngine}.
  */
 public class EffectManager implements Listener {
+
+    private static final int PASSIVE_BATCH_DIVISOR = 4;
 
     private final MoonTalismansPlugin plugin;
     private final NamespacedKey keyId;
@@ -53,16 +57,28 @@ public class EffectManager implements Listener {
     private final Map<UUID, Set<PotionEffectType>> lastPassivePotionEffects = new ConcurrentHashMap<>();
     private final Set<UUID> pandoraPotionExtensionInProgress = ConcurrentHashMap.newKeySet();
 
+    // Player-Item cache: avoids repeated PDC lookups in event handlers
+    private final Map<UUID, CachedPlayerItem> playerItemCache = new ConcurrentHashMap<>();
+
+    // Deferred particle queue: particles computed during mechanics, flushed async
+    private final ConcurrentLinkedQueue<DeferredParticle> particleQueue = new ConcurrentLinkedQueue<>();
+
     // Scheduled tasks
     private BukkitRunnable passiveEffectTask;
     private BukkitRunnable particleTask;
     private int cooldownCleanupTaskId = -1;
+    private int particleFlushTaskId = -1;
+
+    // Batched passive processing state
+    private int passiveBatchIndex = 0;
 
     public EffectManager(MoonTalismansPlugin plugin) {
         this.plugin = plugin;
         this.keyId = new NamespacedKey(plugin, "talisman_id");
         this.keyType = new NamespacedKey(plugin, "talisman_type");
         this.mechanicEngine = new MechanicEngine(plugin);
+        this.mechanicEngine.setParticleConsumer((loc, particle) ->
+            queueParticle(loc.clone().add(0, 1, 0), particle, 10, 0.3, 0.3, 0.3, 0.05));
 
         ConfigurationSection effectsSection = plugin.getConfig().getConfigurationSection("effects");
 
@@ -76,34 +92,130 @@ public class EffectManager implements Listener {
         startPassiveEffectTask();
         startParticleTask();
         startCooldownCleanupTask();
+        startParticleFlushTask();
     }
+
+    // ========== RECORDS ==========
+
+    private record CachedPlayerItem(String itemId, TalismanItem item, long cachedAt) {
+        boolean isExpired() {
+            return System.currentTimeMillis() - cachedAt > 1000; // 1 second TTL
+        }
+    }
+
+    private record DeferredParticle(World world, double x, double y, double z,
+                                     Particle particle, int count,
+                                     double offsetX, double offsetY, double offsetZ,
+                                     double extra, Object data) {}
+
+    private record PandoraPotionSettings(boolean enabled, double chance, double multiplier) {}
 
     // ========== SCHEDULED TASKS ==========
 
+    /**
+     * Batched passive effect processing: instead of processing ALL players every N ticks,
+     * processes 1/BATCH_DIVISOR of players per tick at a higher frequency.
+     * This spreads the CPU load across multiple ticks for smoother performance.
+     */
     private void startPassiveEffectTask() {
         if (!passiveEffectsEnabled) return;
+        long batchInterval = Math.max(1L, effectRefreshIntervalTicks / PASSIVE_BATCH_DIVISOR);
         passiveEffectTask = new BukkitRunnable() {
             @Override
             public void run() {
-                for (Player player : Bukkit.getOnlinePlayers()) {
-                    applyPassiveEffects(player);
+                List<? extends Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+                if (players.isEmpty()) return;
+
+                int totalPlayers = players.size();
+                int batchSize = Math.max(1, (totalPlayers + PASSIVE_BATCH_DIVISOR - 1) / PASSIVE_BATCH_DIVISOR);
+
+                if (passiveBatchIndex >= totalPlayers) {
+                    passiveBatchIndex = 0;
                 }
+
+                int end = Math.min(passiveBatchIndex + batchSize, totalPlayers);
+                for (int i = passiveBatchIndex; i < end; i++) {
+                    applyPassiveEffects(players.get(i));
+                }
+                passiveBatchIndex = end;
             }
         };
-        passiveEffectTask.runTaskTimer(plugin, 20L, effectRefreshIntervalTicks);
+        passiveEffectTask.runTaskTimer(plugin, 20L, batchInterval);
     }
 
+    /**
+     * Particle computation runs async: gathers player locations and item data,
+     * computes particle positions off the main thread, then queues them for sync flush.
+     */
     private void startParticleTask() {
         if (!particlesEnabled) return;
         particleTask = new BukkitRunnable() {
             @Override
             public void run() {
+                // Gather snapshot data on main thread
+                List<ParticleSnapshot> snapshots = new ArrayList<>();
                 for (Player player : Bukkit.getOnlinePlayers()) {
-                    spawnAmbientParticles(player);
+                    CachedPlayerItem cached = getCachedItem(player);
+                    if (cached == null || cached.item() == null) continue;
+                    if (!cached.item().isSphere()) continue;
+
+                    snapshots.add(new ParticleSnapshot(
+                        player.getWorld(),
+                        player.getLocation().getX(),
+                        player.getLocation().getY() + 1.0,
+                        player.getLocation().getZ()
+                    ));
                 }
+
+                if (snapshots.isEmpty()) return;
+
+                // Compute particle positions async and queue them
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                    for (ParticleSnapshot snap : snapshots) {
+                        computeCircleParticles(snap.world, snap.x, snap.y, snap.z,
+                            Particle.DUST, 2, 0.25);
+                    }
+                });
             }
         };
         particleTask.runTaskTimer(plugin, 10L, particleIntervalTicks);
+    }
+
+    private record ParticleSnapshot(World world, double x, double y, double z) {}
+
+    private void computeCircleParticles(World world, double cx, double cy, double cz,
+                                         Particle particle, int count, double radius) {
+        for (int i = 0; i < count; i++) {
+            double angle = (2 * Math.PI * i) / count;
+            double x = cx + radius * Math.cos(angle);
+            double z = cz + radius * Math.sin(angle);
+            particleQueue.add(new DeferredParticle(
+                world, x, cy, z, particle, 1,
+                0, 0, 0, 0,
+                particle == Particle.DUST ? new Particle.DustOptions(Color.fromRGB(128, 0, 255), 1.0f) : null
+            ));
+        }
+    }
+
+    /**
+     * Flushes queued particles on the main thread at a fixed rate.
+     * Limits particles per flush to prevent lag spikes.
+     */
+    private void startParticleFlushTask() {
+        particleFlushTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            int flushed = 0;
+            int maxPerFlush = 100;
+            DeferredParticle p;
+            while (flushed < maxPerFlush && (p = particleQueue.poll()) != null) {
+                if (p.data() != null) {
+                    p.world().spawnParticle(p.particle(), p.x(), p.y(), p.z(), p.count(), p.data());
+                } else {
+                    p.world().spawnParticle(p.particle(), p.x(), p.y(), p.z(), p.count(),
+                        p.offsetX(), p.offsetY(), p.offsetZ(), p.extra());
+                }
+                flushed++;
+            }
+        }, 2L, 2L);
     }
 
     /**
@@ -117,16 +229,83 @@ public class EffectManager implements Listener {
                 if (map.isEmpty()) cooldowns.remove(uuid);
             });
             mechanicEngine.cleanExpiredCooldowns(now);
-        }, 6000L, 6000L).getTaskId(); // Every 5 minutes
+
+            // Clean expired item cache entries async
+            playerItemCache.entrySet().removeIf(entry -> entry.getValue().isExpired());
+        }, 6000L, 6000L).getTaskId();
+    }
+
+    // ========== PLAYER-ITEM CACHE ==========
+
+    /**
+     * Gets the cached TalismanItem for a player. Returns null if not cached or expired.
+     * Cache is populated on passive effect processing and invalidated on item swap/quit.
+     */
+    private CachedPlayerItem getCachedItem(Player player) {
+        CachedPlayerItem cached = playerItemCache.get(player.getUniqueId());
+        if (cached != null && !cached.isExpired()) {
+            return cached;
+        }
+        return null;
+    }
+
+    /**
+     * Resolves and caches the player's offhand TalismanItem.
+     * Returns the resolved TalismanItem or null.
+     */
+    private TalismanItem resolveAndCacheItem(Player player) {
+        ItemStack offhand = player.getInventory().getItemInOffHand();
+        String itemId = getItemId(offhand);
+
+        if (itemId == null) {
+            playerItemCache.remove(player.getUniqueId());
+            return null;
+        }
+
+        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
+        if (itemOpt.isEmpty()) {
+            playerItemCache.remove(player.getUniqueId());
+            return null;
+        }
+
+        TalismanItem item = itemOpt.get();
+        playerItemCache.put(player.getUniqueId(),
+            new CachedPlayerItem(itemId, item, System.currentTimeMillis()));
+        return item;
+    }
+
+    /**
+     * Gets the player's TalismanItem, using cache if available, otherwise resolving fresh.
+     */
+    private TalismanItem getPlayerItem(Player player) {
+        CachedPlayerItem cached = getCachedItem(player);
+        if (cached != null) {
+            return cached.item();
+        }
+        return resolveAndCacheItem(player);
+    }
+
+    private String getPlayerItemId(Player player) {
+        CachedPlayerItem cached = getCachedItem(player);
+        if (cached != null) {
+            return cached.itemId();
+        }
+        resolveAndCacheItem(player);
+        CachedPlayerItem fresh = playerItemCache.get(player.getUniqueId());
+        return fresh != null ? fresh.itemId() : null;
     }
 
     // ========== PASSIVE EFFECTS ==========
 
     private void applyPassiveEffects(Player player) {
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
+        TalismanItem item = resolveAndCacheItem(player);
+        String itemId = null;
+        CachedPlayerItem cached = playerItemCache.get(player.getUniqueId());
+        if (cached != null) {
+            itemId = cached.itemId();
+        }
 
-        if (itemId == null) {
+        if (item == null) {
             clearPassiveEffects(player);
             activeEffects.remove(player.getUniqueId());
             lastPassiveItemId.remove(player.getUniqueId());
@@ -140,16 +319,6 @@ public class EffectManager implements Listener {
             lastPassivePotionEffects.remove(player.getUniqueId());
         }
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) {
-            clearPassiveEffects(player);
-            activeEffects.remove(player.getUniqueId());
-            lastPassiveItemId.remove(player.getUniqueId());
-            lastPassivePotionEffects.remove(player.getUniqueId());
-            return;
-        }
-
-        TalismanItem item = itemOpt.get();
         lastPassiveItemId.put(player.getUniqueId(), itemId);
         lastPassivePotionEffects.put(player.getUniqueId(), collectPassivePotionEffects(item));
 
@@ -157,10 +326,7 @@ public class EffectManager implements Listener {
             return;
         }
 
-        // Apply configured passive potion effects from item definition
         applyConfiguredPassivePotions(player, item);
-
-        // Apply mechanic system passive effects
         mechanicEngine.applyPassiveMechanics(player, item);
     }
 
@@ -214,41 +380,6 @@ public class EffectManager implements Listener {
         return effects;
     }
 
-    // ========== PARTICLES ==========
-
-    private void spawnAmbientParticles(Player player) {
-        if (!particlesEnabled) return;
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-
-        if (itemId == null) return;
-
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
-        if (item.isSphere()) {
-            Location loc = player.getLocation().clone().add(0, 1, 0);
-            World world = player.getWorld();
-            spawnCircleParticles(world, loc, Particle.DUST, 2, 0.25);
-        }
-    }
-
-    private void spawnCircleParticles(World world, Location center, Particle particle, int count, double radius) {
-        for (int i = 0; i < count; i++) {
-            double angle = (2 * Math.PI * i) / count;
-            double x = center.getX() + radius * Math.cos(angle);
-            double z = center.getZ() + radius * Math.sin(angle);
-
-            if (particle == Particle.DUST) {
-                world.spawnParticle(particle, x, center.getY(), z, 1,
-                    new Particle.DustOptions(Color.fromRGB(128, 0, 255), 1.0f));
-            } else {
-                world.spawnParticle(particle, x, center.getY(), z, 1, 0, 0, 0, 0);
-            }
-        }
-    }
-
     // ========== EVENT HANDLERS ==========
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -256,14 +387,9 @@ public class EffectManager implements Listener {
         if (!(event.getDamager() instanceof Player player)) return;
         if (!(event.getEntity() instanceof LivingEntity target)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
         mechanicEngine.handleAttackMechanics(player, target, event, item);
     }
 
@@ -273,14 +399,9 @@ public class EffectManager implements Listener {
         Player killer = entity.getKiller();
         if (killer == null) return;
 
-        ItemStack offhand = killer.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
+        TalismanItem item = getPlayerItem(killer);
+        if (item == null) return;
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
         for (TalismanMechanic mechanic : item.getMechanics()) {
             if (!mechanic.isEnabled() || mechanic.getType() != MechanicType.HEAL_ON_KILL) {
                 continue;
@@ -292,7 +413,7 @@ public class EffectManager implements Listener {
             }
 
             killer.setHealth(Math.min(killer.getHealth() + heal, killer.getMaxHealth()));
-            spawnHitParticles(killer.getLocation(), Particle.HEART);
+            mechanicEngine.queueParticle(killer.getLocation(), Particle.HEART);
         }
     }
 
@@ -308,14 +429,9 @@ public class EffectManager implements Listener {
         UUID playerId = player.getUniqueId();
         if (pandoraPotionExtensionInProgress.remove(playerId)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
         PandoraPotionSettings settings = getPandoraPotionSettings(item);
         if (settings == null || !settings.enabled()) return;
         if (settings.chance() <= 0 || settings.multiplier() <= 1.0) return;
@@ -352,20 +468,12 @@ public class EffectManager implements Listener {
         return null;
     }
 
-    private record PandoraPotionSettings(boolean enabled, double chance, double multiplier) {}
-
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerTakeDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
-        ItemStack offhand = player.getInventory().getItemInOffHand();
-        String itemId = getItemId(offhand);
-        if (itemId == null) return;
-
-        Optional<TalismanItem> itemOpt = plugin.getItemManager().getItem(itemId);
-        if (itemOpt.isEmpty()) return;
-
-        TalismanItem item = itemOpt.get();
+        TalismanItem item = getPlayerItem(player);
+        if (item == null) return;
 
         // Check death mechanics first
         if (player.getHealth() - event.getFinalDamage() <= 0) {
@@ -381,11 +489,14 @@ public class EffectManager implements Listener {
 
     @EventHandler
     public void onItemSwap(PlayerSwapHandItemsEvent event) {
+        // Invalidate cache on item swap
+        playerItemCache.remove(event.getPlayer().getUniqueId());
         Bukkit.getScheduler().runTaskLater(plugin, () -> applyPassiveEffects(event.getPlayer()), 1L);
     }
 
     @EventHandler
     public void onItemHeldChange(PlayerItemHeldEvent event) {
+        playerItemCache.remove(event.getPlayer().getUniqueId());
         Bukkit.getScheduler().runTaskLater(plugin, () -> applyPassiveEffects(event.getPlayer()), 1L);
     }
 
@@ -398,14 +509,21 @@ public class EffectManager implements Listener {
         lastPassiveItemId.remove(uuid);
         lastPassivePotionEffects.remove(uuid);
         pandoraPotionExtensionInProgress.remove(uuid);
+        playerItemCache.remove(uuid);
         mechanicEngine.clearPlayerData(uuid);
     }
 
     // ========== UTILITIES ==========
 
-    private void spawnHitParticles(Location loc, Particle particle) {
-        Location adjusted = loc.clone().add(0, 1, 0);
-        adjusted.getWorld().spawnParticle(particle, adjusted, 10, 0.3, 0.3, 0.3, 0.05);
+    /**
+     * Queues a particle for deferred spawning (used by EffectManager internally).
+     */
+    void queueParticle(Location loc, Particle particle, int count,
+                       double offsetX, double offsetY, double offsetZ, double extra) {
+        particleQueue.add(new DeferredParticle(
+            loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(),
+            particle, count, offsetX, offsetY, offsetZ, extra, null
+        ));
     }
 
     private String getItemId(ItemStack item) {
@@ -474,11 +592,16 @@ public class EffectManager implements Listener {
         if (cooldownCleanupTaskId != -1) {
             Bukkit.getScheduler().cancelTask(cooldownCleanupTaskId);
         }
+        if (particleFlushTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(particleFlushTaskId);
+        }
         mechanicEngine.cleanup();
         cooldowns.clear();
         activeEffects.clear();
         lastPassiveItemId.clear();
         lastPassivePotionEffects.clear();
         pandoraPotionExtensionInProgress.clear();
+        playerItemCache.clear();
+        particleQueue.clear();
     }
 }

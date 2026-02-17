@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiConsumer;
 
 /**
  * Новый движок механик - работает напрямую с конфигурацией механик в предметах.
@@ -33,9 +34,27 @@ public class MechanicEngine {
 
     private final MoonTalismansPlugin plugin;
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
+    private BiConsumer<Location, Particle> particleConsumer;
 
     public MechanicEngine(MoonTalismansPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    /**
+     * Sets a callback for deferred particle spawning.
+     * When set, all particle spawning routes through this consumer
+     * instead of spawning directly on the current thread.
+     */
+    public void setParticleConsumer(BiConsumer<Location, Particle> consumer) {
+        this.particleConsumer = consumer;
+    }
+
+    /**
+     * Queues a particle for deferred spawning via the particle consumer.
+     * Falls back to direct spawning if no consumer is set.
+     */
+    public void queueParticle(Location loc, Particle particle) {
+        spawnHitParticles(loc, particle);
     }
 
     /**
@@ -1106,8 +1125,12 @@ public class MechanicEngine {
     }
 
     private void spawnHitParticles(Location loc, Particle particle) {
-        Location adjusted = loc.clone().add(0, 1, 0);
-        adjusted.getWorld().spawnParticle(particle, adjusted, 10, 0.3, 0.3, 0.3, 0.05);
+        if (particleConsumer != null) {
+            particleConsumer.accept(loc, particle);
+        } else {
+            Location adjusted = loc.clone().add(0, 1, 0);
+            adjusted.getWorld().spawnParticle(particle, adjusted, 10, 0.3, 0.3, 0.3, 0.05);
+        }
     }
 
     private boolean isOnCooldown(Player player, String ability) {
