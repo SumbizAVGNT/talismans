@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,12 @@ import java.util.function.BiConsumer;
  */
 public class MechanicEngine {
     private static final String META_REFLECT_GUARD = "moontalismans_reflecting";
+    private static final Map<String, String> LEGACY_EFFECT_ALIASES = Map.of(
+        "INCREASE_DAMAGE", "STRENGTH",
+        "DAMAGE_RESISTANCE", "RESISTANCE",
+        "SLOW", "SLOWNESS",
+        "CONFUSION", "NAUSEA"
+    );
 
     private final MoonTalismansPlugin plugin;
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
@@ -95,6 +102,7 @@ public class MechanicEngine {
                 case ANGEL_WINGS -> applyAngelWings(player, mechanic);
                 case REPAIR_EQUIPMENT -> applyRepairEquipment(player, mechanic);
                 case DARK_PACT -> applyDarkPact(player, mechanic);
+                case ANOMALY_EFFECT -> applyAnomalyEffect(player, mechanic);
                 default -> {}
             }
         }
@@ -813,6 +821,82 @@ public class MechanicEngine {
             damageable.setDamage(repaired);
             item.setItemMeta(damageable);
         }
+    }
+
+    private void applyAnomalyEffect(Player player, TalismanMechanic mechanic) {
+        String cooldownKey = "anomaly_effect";
+        if (isOnCooldown(player, cooldownKey)) {
+            return;
+        }
+
+        List<String> positiveNames = mechanic.getStringList("positive_effects");
+        List<String> negativeNames = mechanic.getStringList("negative_effects");
+
+        List<PotionEffectType> positiveAvailable = new ArrayList<>();
+        for (String name : positiveNames) {
+            PotionEffectType type = resolvePotionEffectType(name);
+            if (type != null && !player.hasPotionEffect(type)) {
+                positiveAvailable.add(type);
+            }
+        }
+
+        List<PotionEffectType> negativeAvailable = new ArrayList<>();
+        for (String name : negativeNames) {
+            PotionEffectType type = resolvePotionEffectType(name);
+            if (type != null && !player.hasPotionEffect(type)) {
+                negativeAvailable.add(type);
+            }
+        }
+
+        if (positiveAvailable.isEmpty() && negativeAvailable.isEmpty()) {
+            return;
+        }
+
+        double positiveChance = mechanic.getDouble("positive_chance", 0.95);
+        double negativeChance = mechanic.getDouble("negative_chance", 0.05);
+        double total = positiveChance + negativeChance;
+        if (total <= 0) return;
+        double negProb = negativeChance / total;
+
+        boolean tryNegative = ThreadLocalRandom.current().nextDouble() < negProb;
+        PotionEffectType chosen = null;
+
+        if (tryNegative) {
+            chosen = pickRandomType(negativeAvailable);
+            if (chosen == null) chosen = pickRandomType(positiveAvailable);
+        } else {
+            chosen = pickRandomType(positiveAvailable);
+            if (chosen == null) chosen = pickRandomType(negativeAvailable);
+        }
+
+        if (chosen == null) return;
+
+        int duration = mechanic.getInt("duration", 600);
+        player.addPotionEffect(new PotionEffect(chosen, duration, 0, true, false, true));
+
+        long cooldown = mechanic.getLong("cooldown", 30000);
+        setCooldown(player, cooldownKey, cooldown);
+    }
+
+    private PotionEffectType pickRandomType(List<PotionEffectType> list) {
+        if (list == null || list.isEmpty()) return null;
+        return list.get(ThreadLocalRandom.current().nextInt(list.size()));
+    }
+
+    private static PotionEffectType resolvePotionEffectType(String name) {
+        if (name == null || name.isBlank()) return null;
+        String normalized = name.trim().toUpperCase(Locale.ROOT);
+
+        PotionEffectType type = PotionEffectType.getByName(normalized);
+        if (type != null) return type;
+
+        String legacy = LEGACY_EFFECT_ALIASES.get(normalized);
+        if (legacy != null) {
+            type = PotionEffectType.getByName(legacy);
+            if (type != null) return type;
+        }
+
+        return null;
     }
 
     private PotionEffect createPotionEffect(TalismanMechanic mechanic, PotionEffectType type, int duration, int amplifier) {
