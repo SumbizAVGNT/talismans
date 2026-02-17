@@ -12,10 +12,16 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -23,8 +29,10 @@ import java.util.concurrent.ThreadLocalRandom;
  * Убирает хардкод названий и позволяет гибко настраивать любые механики.
  */
 public class MechanicEngine {
+    private static final String META_REFLECT_GUARD = "moontalismans_reflecting";
+
     private final MoonTalismansPlugin plugin;
-    private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
+    private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
 
     public MechanicEngine(MoonTalismansPlugin plugin) {
         this.plugin = plugin;
@@ -118,6 +126,11 @@ public class MechanicEngine {
      * Обрабатывает механики при получении урона.
      */
     public void handleDamageMechanics(Player player, EntityDamageEvent event, TalismanItem item) {
+        // Skip processing if this damage event was caused by our own reflect/thorns
+        if (player.hasMetadata(META_REFLECT_GUARD)) {
+            return;
+        }
+
         for (TalismanMechanic mechanic : item.getMechanics()) {
             if (!mechanic.isEnabled() || !mechanic.getType().triggersOnDamage()) {
                 continue;
@@ -289,7 +302,7 @@ public class MechanicEngine {
 
     private void applyExperienceGain(Player player, TalismanMechanic mechanic) {
         int xp = mechanic.getInt("xp_per_tick", 1);
-        if (Math.random() < 0.01) { // 1% chance per tick
+        if (ThreadLocalRandom.current().nextDouble() < 0.01) { // 1% chance per tick
             player.giveExp(xp);
         }
     }
@@ -310,7 +323,7 @@ public class MechanicEngine {
 
     private void handlePoisonOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.30);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
                 target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
@@ -321,7 +334,7 @@ public class MechanicEngine {
 
     private void handleSlownessOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.25);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
                 target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
@@ -332,7 +345,7 @@ public class MechanicEngine {
 
     private void handleFireOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.30);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             int duration = mechanic.getInt("duration", 40);
             target.setFireTicks(duration);
             spawnHitParticles(target.getLocation(), Particle.FLAME);
@@ -341,7 +354,7 @@ public class MechanicEngine {
 
     private void handleFreezeOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 2, true, true, true));
             target.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 60, 1, true, true, true));
             spawnHitParticles(target.getLocation(), Particle.SNOWFLAKE);
@@ -350,7 +363,7 @@ public class MechanicEngine {
 
     private void handleStunOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             List<TalismanMechanic.PotionEffectConfig> effects = mechanic.getPotionEffectList("effects");
             for (TalismanMechanic.PotionEffectConfig effect : effects) {
                 target.addPotionEffect(new PotionEffect(effect.type(), effect.duration(), effect.amplifier(), effect.ambient(), effect.particles(), effect.icon()));
@@ -376,12 +389,12 @@ public class MechanicEngine {
 
     private void handleRandomDebuff(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.35);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             PotionEffectType[] effects = {
                 PotionEffectType.POISON, PotionEffectType.WITHER,
                 PotionEffectType.SLOWNESS, PotionEffectType.WEAKNESS, PotionEffectType.BLINDNESS
             };
-            PotionEffectType random = effects[(int) (Math.random() * effects.length)];
+            PotionEffectType random = effects[ThreadLocalRandom.current().nextInt(effects.length)];
             int duration = mechanic.getInt("duration", 60);
             int amplifier = mechanic.getInt("amplifier", 0);
             target.addPotionEffect(new PotionEffect(random, duration, amplifier, true, true, true));
@@ -391,7 +404,7 @@ public class MechanicEngine {
 
     private void handleAoeWeakness(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.25);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double radius = mechanic.getDouble("radius", 3.0);
             TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
             if (effect != null) {
@@ -426,7 +439,7 @@ public class MechanicEngine {
 
     private void handleLightningStrike(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.10);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             target.getWorld().strikeLightningEffect(target.getLocation());
             double damage = mechanic.getDouble("damage", 5.0);
             target.damage(damage);
@@ -435,7 +448,7 @@ public class MechanicEngine {
 
     private void handleChainLightning(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.15);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double radius = mechanic.getDouble("radius", 5.0);
             double damage = mechanic.getDouble("damage", 3.0);
             int maxTargets = mechanic.getInt("max_targets", 3);
@@ -453,7 +466,7 @@ public class MechanicEngine {
 
     private void handleArmorPenetration(EntityDamageByEntityEvent event, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double multiplier = mechanic.getDouble("multiplier", 1.30);
             event.setDamage(event.getDamage() * multiplier);
         }
@@ -461,7 +474,7 @@ public class MechanicEngine {
 
     private void handleArmorShred(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.25);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             int duration = mechanic.getInt("duration", 100);
             int amplifier = mechanic.getInt("amplifier", 1);
             target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, duration, amplifier, true, true, true));
@@ -470,7 +483,7 @@ public class MechanicEngine {
 
     private void handleStealEffects(Player attacker, LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.15);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             Collection<PotionEffect> effects = target.getActivePotionEffects();
             List<PotionEffect> stealable = new ArrayList<>();
             for (PotionEffect effect : effects) {
@@ -497,7 +510,7 @@ public class MechanicEngine {
 
     private void handleSpeedOnDamage(Player player, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 1.0);
-        if (Math.random() >= chance) {
+        if (ThreadLocalRandom.current().nextDouble() >= chance) {
             return;
         }
         TalismanMechanic.PotionEffectConfig effect = mechanic.getPotionEffect("effect");
@@ -515,8 +528,8 @@ public class MechanicEngine {
         if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
             double percent = mechanic.getDouble("percent", 0.15);
             double reflectDamage = event.getDamage() * percent;
-            attacker.damage(reflectDamage, player);
-            player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
+            applyReflectedDamage(player, attacker, reflectDamage);
+            player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().clone().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
         }
     }
 
@@ -530,7 +543,7 @@ public class MechanicEngine {
     private void handleThornsDamage(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
         if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
             double damage = mechanic.getDouble("damage", 2.0);
-            attacker.damage(damage, player);
+            applyReflectedDamage(player, attacker, damage);
             spawnHitParticles(attacker.getLocation(), Particle.CRIT);
         }
     }
@@ -538,7 +551,7 @@ public class MechanicEngine {
     private void handleDarknessOnHit(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
         if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof Player attacker) {
             double chance = mechanic.getDouble("chance", 0.15);
-            if (Math.random() >= chance) {
+            if (ThreadLocalRandom.current().nextDouble() >= chance) {
                 return;
             }
 
@@ -562,7 +575,7 @@ public class MechanicEngine {
 
     private void handleDodgeChance(EntityDamageEvent event, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.15);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             event.setCancelled(true);
         }
     }
@@ -597,7 +610,7 @@ public class MechanicEngine {
             double percent = mechanic.getDouble("percent", 0.50);
             double redirected = event.getDamage() * percent;
             event.setDamage(event.getDamage() - redirected);
-            attacker.damage(redirected, player);
+            applyReflectedDamage(player, attacker, redirected);
         }
     }
 
@@ -636,7 +649,8 @@ public class MechanicEngine {
         }
 
         Location loc = player.getLocation();
-        player.getWorld().spawnParticle(Particle.FLAME, loc.add(0, 1, 0), 50, 0.5, 0.5, 0.5, 0.1);
+        Location particleLoc = loc.clone().add(0, 1, 0);
+        player.getWorld().spawnParticle(Particle.FLAME, particleLoc, 50, 0.5, 0.5, 0.5, 0.1);
         player.getWorld().spawnParticle(Particle.LAVA, loc, 20, 0.5, 0.5, 0.5, 0);
         player.playSound(loc, Sound.ENTITY_BLAZE_SHOOT, 1.0f, 1.5f);
 
@@ -666,7 +680,8 @@ public class MechanicEngine {
         player.addPotionEffect(createPotionEffect(mechanic, PotionEffectType.REGENERATION, 200, 3));
 
         Location loc = player.getLocation();
-        player.getWorld().spawnParticle(Particle.END_ROD, loc.add(0, 1, 0), 100, 1, 2, 1, 0.1);
+        Location particleLoc = loc.clone().add(0, 1, 0);
+        player.getWorld().spawnParticle(Particle.END_ROD, particleLoc, 100, 1, 2, 1, 0.1);
         player.playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 2.0f);
 
         long cooldown = mechanic.getLong("cooldown", 600000);
@@ -772,7 +787,7 @@ public class MechanicEngine {
             if (damageable.getDamage() <= 0) {
                 continue;
             }
-            if (Math.random() >= chance) {
+            if (ThreadLocalRandom.current().nextDouble() >= chance) {
                 continue;
             }
             int repaired = Math.max(0, damageable.getDamage() - amount);
@@ -793,10 +808,10 @@ public class MechanicEngine {
 
     private void handlePhaseShift(Player attacker, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double radius = mechanic.getDouble("radius", 5.0);
             Location current = attacker.getLocation();
-            double angle = Math.random() * 2 * Math.PI;
+            double angle = ThreadLocalRandom.current().nextDouble() * 2 * Math.PI;
             Location newLoc = current.clone().add(
                 Math.cos(angle) * radius,
                 0,
@@ -810,7 +825,7 @@ public class MechanicEngine {
 
     private void handleVoidStrike(EntityDamageByEntityEvent event, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.15);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double multiplier = mechanic.getDouble("multiplier", 2.0);
             event.setDamage(event.getDamage() * multiplier);
             spawnHitParticles(event.getEntity().getLocation(), Particle.DRAGON_BREATH);
@@ -819,9 +834,9 @@ public class MechanicEngine {
 
     private void handleChaosDamage(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.25);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             Particle[] particles = {Particle.FLAME, Particle.SNOWFLAKE, Particle.ELECTRIC_SPARK, Particle.WITCH};
-            Particle random = particles[(int) (Math.random() * particles.length)];
+            Particle random = particles[ThreadLocalRandom.current().nextInt(particles.length)];
             spawnHitParticles(target.getLocation(), random);
 
             // Random elemental effect
@@ -839,7 +854,7 @@ public class MechanicEngine {
 
     private void handleCurseOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             int duration = mechanic.getInt("duration", 200);
             target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, duration, 0));
             target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, duration, 0));
@@ -861,7 +876,7 @@ public class MechanicEngine {
 
     private void handleComboDamage(Player attacker, EntityDamageByEntityEvent event, TalismanMechanic mechanic) {
         String key = "combo_hits";
-        Map<String, Long> playerData = cooldowns.computeIfAbsent(attacker.getUniqueId(), k -> new HashMap<>());
+        Map<String, Long> playerData = cooldowns.computeIfAbsent(attacker.getUniqueId(), k -> new ConcurrentHashMap<>());
         long lastHit = playerData.getOrDefault(key, 0L);
         long now = System.currentTimeMillis();
 
@@ -884,7 +899,7 @@ public class MechanicEngine {
 
     private void handleWhirlwind(Player attacker, LivingEntity target, EntityDamageByEntityEvent event, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.15);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double radius = mechanic.getDouble("radius", 4.0);
             double damage = mechanic.getDouble("damage", event.getDamage() * 0.5);
 
@@ -910,7 +925,7 @@ public class MechanicEngine {
 
     private void handleBleedOnHit(LivingEntity target, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.30);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             int duration = mechanic.getInt("duration", 100);
             int amplifier = mechanic.getInt("amplifier", 1);
             target.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, duration, amplifier));
@@ -953,16 +968,16 @@ public class MechanicEngine {
     private void handleReflectProjectiles(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
         if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
             double chance = mechanic.getDouble("chance", 0.30);
-            if (Math.random() < chance) {
+            if (ThreadLocalRandom.current().nextDouble() < chance) {
                 event.setCancelled(true);
-                player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
+                player.getWorld().spawnParticle(Particle.CRIT, player.getLocation().clone().add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
             }
         }
     }
 
     private void handleTimeSlow(Player player, EntityDamageEvent event, TalismanMechanic mechanic) {
         double chance = mechanic.getDouble("chance", 0.20);
-        if (Math.random() < chance) {
+        if (ThreadLocalRandom.current().nextDouble() < chance) {
             double radius = mechanic.getDouble("radius", 5.0);
             int duration = mechanic.getInt("duration", 100);
 
@@ -1044,7 +1059,7 @@ public class MechanicEngine {
 
         for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
             if (entity instanceof LivingEntity living) {
-                living.damage(damage, player);
+                applyReflectedDamage(player, living, damage);
                 org.bukkit.util.Vector direction = living.getLocation().toVector()
                     .subtract(player.getLocation().toVector()).normalize();
                 living.setVelocity(direction.multiply(knockback));
@@ -1058,7 +1073,7 @@ public class MechanicEngine {
         if (event instanceof EntityDamageByEntityEvent ede && ede.getDamager() instanceof LivingEntity attacker) {
             if (player.isBlocking()) {
                 double damage = mechanic.getDouble("damage_multiplier", 1.50) * event.getDamage();
-                attacker.damage(damage, player);
+                applyReflectedDamage(player, attacker, damage);
                 event.setCancelled(true);
                 spawnHitParticles(attacker.getLocation(), Particle.CRIT);
             }
@@ -1068,7 +1083,7 @@ public class MechanicEngine {
     private void handleProjectileDeflect(EntityDamageEvent event, TalismanMechanic mechanic) {
         if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
             double chance = mechanic.getDouble("chance", 0.40);
-            if (Math.random() < chance) {
+            if (ThreadLocalRandom.current().nextDouble() < chance) {
                 double reduction = mechanic.getDouble("damage_reduction", 0.50);
                 event.setDamage(event.getDamage() * reduction);
             }
@@ -1077,8 +1092,22 @@ public class MechanicEngine {
 
     // ========== УТИЛИТЫ ==========
 
+    /**
+     * Safely applies reflected/thorns damage with recursion guard.
+     * Prevents infinite ping-pong when both attacker and defender have reflect.
+     */
+    private void applyReflectedDamage(Player source, LivingEntity target, double damage) {
+        source.setMetadata(META_REFLECT_GUARD, new FixedMetadataValue(plugin, true));
+        try {
+            target.damage(damage, source);
+        } finally {
+            source.removeMetadata(META_REFLECT_GUARD, plugin);
+        }
+    }
+
     private void spawnHitParticles(Location loc, Particle particle) {
-        loc.getWorld().spawnParticle(particle, loc.add(0, 1, 0), 10, 0.3, 0.3, 0.3, 0.05);
+        Location adjusted = loc.clone().add(0, 1, 0);
+        adjusted.getWorld().spawnParticle(particle, adjusted, 10, 0.3, 0.3, 0.3, 0.05);
     }
 
     private boolean isOnCooldown(Player player, String ability) {
@@ -1092,13 +1121,13 @@ public class MechanicEngine {
     }
 
     private void setCooldown(Player player, String ability, long durationMs) {
-        cooldowns.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>())
+        cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
                 .put(ability, System.currentTimeMillis() + durationMs);
     }
 
     private Location findSafeLocation(Player player) {
         Location current = player.getLocation();
-        Random random = new Random();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
 
         for (int i = 0; i < 10; i++) {
             double dx = (random.nextDouble() - 0.5) * 20;
@@ -1112,6 +1141,17 @@ public class MechanicEngine {
         }
 
         return null;
+    }
+
+    public void clearPlayerData(UUID playerId) {
+        cooldowns.remove(playerId);
+    }
+
+    public void cleanExpiredCooldowns(long now) {
+        cooldowns.forEach((uuid, map) -> {
+            map.entrySet().removeIf(entry -> entry.getValue() < now);
+            if (map.isEmpty()) cooldowns.remove(uuid);
+        });
     }
 
     public void cleanup() {

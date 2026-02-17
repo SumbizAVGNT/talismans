@@ -46,7 +46,6 @@ public class TalismanItem {
     private final List<Material> shapelessRecipe;
     private final Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers;
     private final List<ConfiguredPotionEffect> passivePotionEffects;
-    private final Double damageReflect;
     private final List<TalismanMechanic> mechanics;
     private final ItemType itemType;
 
@@ -59,7 +58,7 @@ public class TalismanItem {
                        String headTexture, List<Material> shapelessRecipe,
                        Map<EquipmentSlotGroup, Map<Attribute, Double>> attributeModifiers,
                        List<ConfiguredPotionEffect> passivePotionEffects,
-                       Double damageReflect, List<TalismanMechanic> mechanics) {
+                       List<TalismanMechanic> mechanics) {
         this.id = id;
         this.enabled = enabled;
         this.displayName = displayName;
@@ -72,7 +71,6 @@ public class TalismanItem {
         this.shapelessRecipe = shapelessRecipe;
         this.attributeModifiers = attributeModifiers != null ? attributeModifiers : new HashMap<>();
         this.passivePotionEffects = passivePotionEffects != null ? passivePotionEffects : Collections.emptyList();
-        this.damageReflect = damageReflect;
         this.mechanics = mechanics != null ? mechanics : Collections.emptyList();
         this.itemType = resolveItemType(material, headTexture);
     }
@@ -326,15 +324,12 @@ public class TalismanItem {
 
         ConfigurationSection effects = section.getConfigurationSection("effects");
         List<ConfiguredPotionEffect> passiveEffects = parsePassiveEffects(effects);
-        Double damageReflect = effects != null && effects.isSet("damage_reflect")
-            ? effects.getDouble("damage_reflect")
-            : null;
 
         // Парсинг механик
         List<TalismanMechanic> mechanics = parseMechanics(section.getConfigurationSection("mechanics"));
 
         return Optional.of(new TalismanItem(id, enabled, displayName, lore, material, customModelData, glint, flags, headTexture, recipe, attrModifiers,
-            passiveEffects, damageReflect, mechanics));
+            passiveEffects, mechanics));
     }
 
     private static List<TalismanMechanic> parseMechanics(ConfigurationSection section) {
@@ -437,10 +432,6 @@ public class TalismanItem {
 
     public List<ConfiguredPotionEffect> getPassivePotionEffects() {
         return passivePotionEffects;
-    }
-
-    public Optional<Double> getDamageReflect() {
-        return Optional.ofNullable(damageReflect);
     }
 
     public List<TalismanMechanic> getMechanics() {
